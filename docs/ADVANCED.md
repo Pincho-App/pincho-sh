@@ -7,6 +7,7 @@ Advanced patterns, integrations, and best practices for WirePusher shell scripts
 - [Error Handling Patterns](#error-handling-patterns)
 - [Rate Limit Management](#rate-limit-management)
 - [Batch Sending Patterns](#batch-sending-patterns)
+- [NotifAI (Text-to-Notification)](#notifai-text-to-notification)
 - [Environment Management](#environment-management)
 - [Integration Patterns](#integration-patterns)
 - [Shell Scripting Best Practices](#shell-scripting-best-practices)
@@ -210,6 +211,148 @@ export WIREPUSHER_TOKEN
 
 # Process file with 4 parallel jobs
 parallel --colsep '|' send_one {1} {2} :::: notifications.txt
+```
+
+## NotifAI (Text-to-Notification)
+
+NotifAI uses AI to convert free-form text into structured notifications. Useful for automation workflows where you have log messages, alerts, or status updates that should become notifications.
+
+### Basic Usage
+
+```bash
+#!/bin/sh
+. ./wirepusher.sh
+
+# Convert simple text
+wirepusher_notifai "Deploy server and restart all services"
+
+# With type
+wirepusher_notifai --text "SSL certificate expires in 7 days" --type "security"
+
+# From command output
+disk_status=$(df -h / | tail -1)
+wirepusher_notifai "Disk status: $disk_status"
+```
+
+### Processing Log Files
+
+```bash
+#!/bin/sh
+. ./wirepusher.sh
+
+# Send errors from log file
+tail -n 50 /var/log/app.log | grep ERROR | while read -r line; do
+    wirepusher_notifai "$line" --type "errors"
+    sleep 1  # Rate limiting
+done
+```
+
+### CI/CD Integration
+
+```bash
+#!/bin/sh
+. ./wirepusher.sh
+
+# Convert build status to notification
+build_output=$(make build 2>&1 | tail -10)
+exit_code=$?
+
+if [ $exit_code -eq 0 ]; then
+    wirepusher_notifai "Build succeeded. $build_output" --type "ci-cd"
+else
+    wirepusher_notifai "Build failed with exit code $exit_code. $build_output" --type "ci-cd"
+fi
+```
+
+### Monitoring Automation
+
+```bash
+#!/bin/sh
+. ./wirepusher.sh
+
+# Check service health and convert to notification
+check_service() {
+    local service="$1"
+
+    if systemctl is-active --quiet "$service"; then
+        status="running"
+    else
+        status="stopped"
+        wirepusher_notifai "Service $service is $status - requires attention" --type "monitoring"
+    fi
+}
+
+check_service "nginx"
+check_service "postgresql"
+check_service "redis"
+```
+
+### Processing Complex Status Messages
+
+```bash
+#!/bin/sh
+. ./wirepusher.sh
+
+# Aggregate system metrics
+cpu=$(top -bn1 | grep "Cpu(s)" | awk '{print $2}')
+mem=$(free -m | awk 'NR==2{printf "%.1f%%", $3*100/$2}')
+disk=$(df -h / | awk 'NR==2{print $5}')
+
+status="System health check: CPU usage ${cpu}%, Memory usage ${mem}, Disk usage ${disk}"
+wirepusher_notifai "$status" --type "monitoring"
+```
+
+### Batch Processing with NotifAI
+
+```bash
+#!/bin/sh
+. ./wirepusher.sh
+
+# Process alerts from file
+while read -r alert; do
+    if wirepusher_notifai "$alert" --type "alerts"; then
+        echo "Processed: $alert"
+    else
+        echo "Failed: $alert" >&2
+    fi
+    sleep 2  # Rate limiting (50 requests/hour)
+done < alerts.txt
+```
+
+### Error Handling with NotifAI
+
+```bash
+#!/bin/sh
+. ./wirepusher.sh
+
+send_notifai_with_retry() {
+    local text="$1"
+    local max_attempts=3
+    local attempt=1
+
+    while [ $attempt -le $max_attempts ]; do
+        if wirepusher_notifai "$text"; then
+            return 0
+        fi
+
+        exit_code=$?
+
+        # Only retry on network/API errors
+        if [ $exit_code -eq 1 ] || [ $exit_code -eq 2 ]; then
+            echo "Non-retryable error (exit code $exit_code)" >&2
+            return $exit_code
+        fi
+
+        if [ $attempt -lt $max_attempts ]; then
+            echo "Attempt $attempt failed, retrying..." >&2
+            sleep $((attempt * 2))
+            attempt=$((attempt + 1))
+        else
+            echo "All attempts failed" >&2
+            return $exit_code
+        fi
+    done
+}
 ```
 
 ## Environment Management

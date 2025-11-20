@@ -1,479 +1,181 @@
 # WirePusher Shell Scripts - Examples
 
-This directory contains practical examples demonstrating various use cases for the WirePusher shell scripts.
+Practical examples for the WirePusher shell scripts.
 
 ## Prerequisites
 
-Before running these examples, ensure you have:
-
-1. **curl installed** - Required by the WirePusher library:
-   ```bash
-   # Check if curl is installed
-   which curl
-
-   # Install if needed
-   # macOS: brew install curl
-   # Ubuntu/Debian: sudo apt install curl
-   # RHEL/CentOS: sudo yum install curl
-   ```
-
-2. **API Token** - Get your token from [wirepusher.dev](https://wirepusher.dev):
-   ```bash
-   export WIREPUSHER_TOKEN="your-token-here"
-   ```
-
-3. **Shell** - POSIX-compatible shell (sh, bash, dash, zsh, etc.)
+- **curl** - Install via `brew install curl`, `apt install curl`, or `yum install curl`
+- **API Token** - Get from [wirepusher.dev](https://wirepusher.dev), set as `export WIREPUSHER_TOKEN="your-token"`
+- **Shell** - Any POSIX shell (sh, bash, zsh, etc.)
 
 ## Quick Start
 
-1. Clone the repository or download the scripts
-2. Set your API token:
-   ```bash
-   export WIREPUSHER_TOKEN="abc12345"
-   ```
-3. Navigate to the examples directory:
-   ```bash
-   cd examples
-   ```
-4. Run an example:
-   ```bash
-   ./simple.sh
-   ```
-
-## Available Examples
-
-### 1. simple.sh - Basic Usage
-
-**What it does**: Demonstrates fundamental WirePusher usage with both positional and named arguments.
-
-**Use case**: Learning the basics, quick testing
-
-**Run it**:
 ```bash
-export WIREPUSHER_TOKEN="your-token"
+export WIREPUSHER_TOKEN="wpt_your_token"
+cd examples
 ./simple.sh
 ```
 
-**Key concepts**:
-- Environment variable configuration
-- Positional arguments (`wirepusher_send "Title" "Message"`)
-- Named arguments with `--title`, `--message`, `--type`, `--tag`
-- Basic error handling
+## Available Examples
 
-**Example output**:
-```
-Sending simple notification...
-✓ Notification sent successfully!
+### simple.sh - Basic Usage
 
-Sending notification with options...
-✓ Notification sent successfully!
-
-All notifications sent successfully!
-```
-
----
-
-### 2. notifai.sh - AI-Powered Notifications
-
-**What it does**: Uses NotifAI to convert natural language into structured push notifications.
-
-**Use case**: Quick notifications without manually structuring title/message
-
-**Run it**:
+Demonstrates positional and named arguments:
 ```bash
-export WIREPUSHER_TOKEN="your-token"
-./notifai.sh
+./simple.sh
+
+# Positional: wirepusher_send "Title" "Message"
+# Named: wirepusher_send --title "Title" --message "Message" --type "type"
 ```
 
-**Key concepts**:
-- `wirepusher_notifai()` function
-- Natural language to structured notification
-- AI-powered title/message generation
+### cron-job.sh - Periodic Monitoring
 
-**Example**:
+Monitors disk (>80%), memory (>90%), and system load:
 ```bash
-# Instead of:
-wirepusher_send "Deploy Complete" "Production deployment finished successfully"
-
-# Use NotifAI:
-wirepusher_notifai "the production deployment just finished successfully"
-# → AI generates appropriate title and message
-```
-
----
-
-### 3. cron-job.sh - Periodic Monitoring
-
-**What it does**: Monitors disk space and memory usage, sending alerts when thresholds are exceeded.
-
-**Use case**: System monitoring, scheduled health checks
-
-**Run it manually**:
-```bash
-export WIREPUSHER_TOKEN="your-token"
 ./cron-job.sh
+
+# Add to crontab:
+# */15 * * * * WIREPUSHER_TOKEN="token" /path/to/cron-job.sh
 ```
 
-**Add to crontab** for periodic execution:
+### monitoring.sh - System Health Checks
+
+Service status, SSL certificates, and disk space monitoring:
 ```bash
-# Edit crontab
-crontab -e
-
-# Add line to run every 15 minutes:
-*/15 * * * * WIREPUSHER_TOKEN="your-token" /path/to/examples/cron-job.sh
-```
-
-**What it monitors**:
-- Disk space usage (alerts if > 80%)
-- Memory usage (alerts if > 90%)
-- System load
-
-**Key concepts**:
-- Threshold-based alerting
-- System metrics collection (`df`, `free`, `uptime`)
-- Cron integration
-
----
-
-### 4. monitoring.sh - System Health Checks
-
-**What it does**: Performs comprehensive health checks: service status, SSL certificates, and disk space.
-
-**Use case**: Scheduled system health monitoring, DevOps automation
-
-**Run it**:
-```bash
-export WIREPUSHER_TOKEN="your-token"
 ./monitoring.sh
+
+# Customize services list:
+SERVICES="nginx postgresql redis your-service"
 ```
 
-**What it checks**:
-- Systemd service status (nginx, postgresql, redis, etc.)
-- SSL certificate expiration (alerts if < 30 days)
-- Disk space (alerts if > 80%)
+### git-hook.sh - Git Integration
 
-**Customize** by editing the services list:
+Install as post-receive hook to notify on git push:
 ```bash
-# Edit monitoring.sh
-SERVICES="nginx postgresql redis your-service-here"
+cp git-hook.sh /path/to/repo/.git/hooks/post-receive
+chmod +x /path/to/repo/.git/hooks/post-receive
 ```
 
-**Key concepts**:
-- Service health monitoring
-- SSL certificate validation
-- Multiple check types in one script
-- Conditional notifications (only send on problems)
+Reports: repo name, branch, author, commit message, commit count
 
----
+### ci-pipeline.sh - CI/CD Integration
 
-### 5. git-hook.sh - Git Integration
-
-**What it does**: Sends notifications when code is pushed to a Git repository.
-
-**Use case**: Team collaboration, deployment tracking
-
-**Installation**:
+Pipeline notifications for started/success/failed states:
 ```bash
-# 1. Copy to your repository's hooks directory
-cp git-hook.sh /path/to/your/repo/.git/hooks/post-receive
-
-# 2. Make it executable
-chmod +x /path/to/your/repo/.git/hooks/post-receive
-
-# 3. Set token in hook file or environment
-export WIREPUSHER_TOKEN="your-token"
+./ci-pipeline.sh started
+./ci-pipeline.sh success
+./ci-pipeline.sh failed
 ```
 
-**What it reports**:
-- Repository name
-- Branch pushed to
-- Commit author
-- Commit message
-- Number of commits
-
-**Key concepts**:
-- Git hook integration
-- Parsing Git output
-- Team notification patterns
-
-**Example notification**:
-```
-Title: Git Push: main branch
-Message:
-Repository: my-project
-Branch: main
-Author: John Doe
-Commits: 3
-Latest: Add new feature (#123)
-```
-
----
-
-### 6. ci-pipeline.sh - CI/CD Integration
-
-**What it does**: Sends notifications for CI/CD pipeline events (started, success, failure).
-
-**Use case**: Continuous integration, deployment pipelines
-
-**Run it**:
-```bash
-export WIREPUSHER_TOKEN="your-token"
-./ci-pipeline.sh started   # Pipeline started
-./ci-pipeline.sh success   # Pipeline succeeded
-./ci-pipeline.sh failed    # Pipeline failed
-```
-
-**Integrations**:
-
-#### GitLab CI
+**GitLab CI:**
 ```yaml
-# .gitlab-ci.yml
 deploy:
-  script:
-    - ./deploy.sh
   after_script:
-    - cd scripts && ./ci-pipeline.sh $CI_JOB_STATUS
+    - ./ci-pipeline.sh $CI_JOB_STATUS
 ```
 
-#### GitHub Actions
+**GitHub Actions:**
 ```yaml
-# .github/workflows/deploy.yml
 - name: Notify
   if: always()
   run: ./ci-pipeline.sh ${{ job.status }}
 ```
 
-#### Jenkins
+**Jenkins:**
 ```groovy
-// Jenkinsfile
 post {
-    success { sh './ci-pipeline.sh success' }
-    failure { sh './ci-pipeline.sh failed' }
+  success { sh './ci-pipeline.sh success' }
+  failure { sh './ci-pipeline.sh failed' }
 }
 ```
 
-**Key concepts**:
-- Pipeline state notifications
-- CI/CD environment variable detection
-- Cross-platform CI integration
+### error-handling.sh - Retry Logic
 
----
+Demonstrates comprehensive error handling with exponential backoff:
+```bash
+./error-handling.sh
+```
+
+Features: retry logic, exit code handling, logging, exponential backoff
+
+### rate-limits.sh - Rate Limit Tracking
+
+Monitor and track API rate limits:
+```bash
+./rate-limits.sh
+```
+
+Shows remaining requests, limit warnings, reset time tracking
+
+### parallel-send.sh - Batch Operations
+
+Send multiple notifications efficiently:
+```bash
+./parallel-send.sh
+```
+
+Demonstrates: sequential batch, parallel with xargs, GNU parallel
 
 ## Common Patterns
 
-### Pattern 1: Environment Variable Configuration
-
-All examples support environment-based configuration:
-
+**Token configuration:**
 ```bash
-# Method 1: Export before running
-export WIREPUSHER_TOKEN="abc12345"
-./simple.sh
-
-# Method 2: Inline environment variable
-WIREPUSHER_TOKEN="abc12345" ./simple.sh
-
-# Method 3: Load from file
-export WIREPUSHER_TOKEN=$(cat ~/.wirepusher/token)
-./simple.sh
+export WIREPUSHER_TOKEN="wpt_abc12345"    # Before running
+WIREPUSHER_TOKEN="wpt_abc" ./simple.sh    # Inline
+export WIREPUSHER_TOKEN=$(cat ~/.token)   # From file
 ```
 
-### Pattern 2: Error Handling
-
-Examples demonstrate different error handling approaches:
-
+**Batch operations:**
 ```bash
-# Simple: Exit on error
-set -e
-wirepusher_send "Title" "Message"
-
-# Conditional: Check exit code
-if wirepusher_send "Title" "Message"; then
-    echo "Success!"
-else
-    echo "Failed with code $?"
-fi
-
-# Capture exit code
-wirepusher_send "Title" "Message"
-exit_code=$?
-if [ $exit_code -ne 0 ]; then
-    echo "Error: Exit code $exit_code"
-fi
-```
-
-### Pattern 3: Batch Operations
-
-Send multiple notifications:
-
-```bash
-# Sequential
 for server in web1 web2 web3; do
-    wirepusher_send "Server $server" "Status OK" "$WIREPUSHER_TOKEN"
+    wirepusher_send "Server $server" "Status OK"
 done
 
-# From file
 while read -r line; do
-    wirepusher_send "Alert" "$line" "$WIREPUSHER_TOKEN"
+    wirepusher_send "Alert" "$line"
 done < notifications.txt
 ```
 
-### Pattern 4: Conditional Notifications
-
-Only send on specific conditions:
-
+**Conditional notifications:**
 ```bash
-# Check disk space
 usage=$(df -h / | awk 'NR==2 {print $5}' | tr -d '%')
 if [ "$usage" -gt 80 ]; then
-    wirepusher_send "Disk Alert" "Disk usage: ${usage}%" "$WIREPUSHER_TOKEN"
-fi
-
-# Check service status
-if ! systemctl is-active --quiet nginx; then
-    wirepusher_send "Service Down" "nginx is not running" "$WIREPUSHER_TOKEN"
+    wirepusher_send "Disk Alert" "Disk usage: ${usage}%"
 fi
 ```
 
-## Advanced Usage
-
-For advanced patterns and integration techniques, see:
-
-- **[docs/ADVANCED.md](../docs/ADVANCED.md)** - Comprehensive advanced usage guide
-  - Error handling patterns
-  - Retry logic
-  - Parallel sending
-  - Environment management
-  - Integration patterns (systemd, cron, CI/CD)
-  - Debugging techniques
-
-- **[docs/SECURITY.md](../docs/SECURITY.md)** - Security best practices
-  - Token storage
-  - Input validation
-  - Permissions
-  - Secret managers
-
-## Customization
-
-### Modify an Example
-
-1. Copy the example:
-   ```bash
-   cp simple.sh my-custom-script.sh
-   ```
-
-2. Edit for your needs:
-   ```bash
-   # Change notification title, message, type, tags
-   wirepusher_send \
-       --title "My Custom Alert" \
-       --message "Custom message here" \
-       --type "custom-type" \
-       --tag "mytag"
-   ```
-
-3. Make it executable:
-   ```bash
-   chmod +x my-custom-script.sh
-   ```
-
-### Add Images or Actions
-
+**With options:**
 ```bash
-# With image
 wirepusher_send \
     --title "Deploy Complete" \
-    --message "v1.2.3 deployed" \
-    --image-url "https://example.com/success.png"
-
-# With action URL
-wirepusher_send \
-    --title "Check Dashboard" \
-    --message "New metrics available" \
-    --action-url "https://dashboard.example.com"
+    --message "v1.2.3" \
+    --type "deployment" \
+    --tag "prod" \
+    --image "https://example.com/success.png" \
+    --action "https://dashboard.example.com"
 ```
 
 ## Troubleshooting
 
-### "curl: command not found"
+| Issue | Solution |
+|-------|----------|
+| `curl: command not found` | Install: `brew install curl`, `apt install curl`, `yum install curl` |
+| Exit code 4 / Failed to send | Check token validity and network connectivity |
+| `Permission denied` | Run `chmod +x script-name.sh` |
+| `No such file or directory: wirepusher.sh` | Source from correct path: `. ../wirepusher.sh` |
+| Messages not appearing | Verify token, ensure app is signed in, enable notifications |
 
-**Solution**: Install curl using your package manager:
+**Debug API connectivity:**
 ```bash
-# macOS
-brew install curl
-
-# Ubuntu/Debian
-sudo apt update && sudo apt install curl
-
-# RHEL/CentOS
-sudo yum install curl
-
-# Alpine Linux
-apk add curl
+curl -v https://wirepusher.com
+echo "Token: ${WIREPUSHER_TOKEN:0:8}..."
 ```
 
-### "Failed to send notification" (Exit code 4)
+## Documentation
 
-**Possible causes**:
-- Invalid API token
-- Network connectivity issues
-- API service unavailable
+- **[README.md](../README.md)** - Quick start and API reference
+- **[docs/ADVANCED.md](../docs/ADVANCED.md)** - Advanced patterns, integrations, debugging
+- **[docs/SECURITY.md](../docs/SECURITY.md)** - Security best practices
+- **[docs/CONTRIBUTING.md](../docs/CONTRIBUTING.md)** - Development guide
 
-**Debug**:
-```bash
-# Test API connectivity
-curl -v https://api.wirepusher.dev
-
-# Verify token (should return 401 if invalid)
-curl -H "Authorization: Bearer your-token" https://api.wirepusher.dev/send
-```
-
-### "Permission denied"
-
-**Solution**: Make script executable:
-```bash
-chmod +x example-name.sh
-```
-
-### "No such file or directory: wirepusher.sh"
-
-**Solution**: Ensure you're running from the examples directory or update the source path:
-```bash
-# From examples directory
-. ../wirepusher.sh
-
-# From elsewhere
-. /full/path/to/wirepusher.sh
-```
-
-### Messages not appearing on device
-
-**Checklist**:
-1. Verify token is correct
-2. Check you're using the right token (personal vs team)
-3. Ensure WirePusher app is installed and signed in
-4. Check device notification permissions
-5. Test with simple.sh to verify basic functionality
-
-## Getting Help
-
-- **Documentation**: See [README.md](../README.md) for full documentation
-- **Advanced patterns**: See [docs/ADVANCED.md](../docs/ADVANCED.md)
-- **Security**: See [docs/SECURITY.md](../docs/SECURITY.md)
-- **Issues**: Report bugs at https://gitlab.com/wirepusher/wirepusher-sh/-/issues
-- **Support**: Email support@wirepusher.dev
-
-## Contributing Examples
-
-Have a useful example? We'd love to include it!
-
-1. Fork the repository
-2. Create your example script
-3. Add documentation to this README
-4. Submit a merge request
-
-See [CONTRIBUTING.md](../CONTRIBUTING.md) for guidelines.
-
----
-
-**Note**: All examples use POSIX-compatible shell syntax and work with `sh`, `bash`, `dash`, `zsh`, and other POSIX shells. They have been tested on macOS, Linux, and BSD systems.
+All examples use POSIX shell syntax and work with sh, bash, zsh, dash on macOS, Linux, and BSD.

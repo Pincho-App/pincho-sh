@@ -12,8 +12,6 @@
 #
 # Environment variables:
 #   WIREPUSHER_TOKEN - Your API token (required if not passed as argument)
-#   WIREPUSHER_ID    - Your user ID (required if not passed as argument)
-#                      DEPRECATED: v1 API - Use token-based authentication for new integrations
 #   WIREPUSHER_URL   - API URL (default: https://wirepusher.com/send)
 #
 # Rate limit variables (exported after each API call):
@@ -89,8 +87,6 @@ _wirepusher_parse_rate_limit_headers() {
 #     --image URL       - Image URL to display
 #     --action URL      - Action URL to open when tapped
 #     --token TEXT      - API token (overrides WIREPUSHER_TOKEN)
-#     --id TEXT         - User ID (overrides WIREPUSHER_ID)
-#                         DEPRECATED: v1 API - Use token-based authentication for new integrations
 #
 # Returns:
 #   0 on success, non-zero on error
@@ -102,7 +98,6 @@ wirepusher_send() {
     local image_url=""
     local action_url=""
     local token="${WIREPUSHER_TOKEN}"
-    local user_id="${WIREPUSHER_ID}"
 
     # Parse arguments
     if [ $# -eq 2 ] && [ "${1#--}" = "$1" ]; then
@@ -145,10 +140,6 @@ wirepusher_send() {
                     token="$2"
                     shift 2
                     ;;
-                --id)
-                    user_id="$2"
-                    shift 2
-                    ;;
                 *)
                     echo "Error: Unknown argument '$1'" >&2
                     echo "Usage: wirepusher_send [--title TITLE] [--message MESSAGE] [options]" >&2
@@ -174,11 +165,6 @@ wirepusher_send() {
         return 2
     fi
 
-    if [ -z "$user_id" ]; then
-        echo "Error: WIREPUSHER_ID environment variable or --id argument is required" >&2
-        return 2
-    fi
-
     # Validate lengths
     title_len=$(printf '%s' "$title" | wc -c | tr -d ' ')
     if [ "$title_len" -gt 256 ]; then
@@ -193,10 +179,8 @@ wirepusher_send() {
     fi
 
     # Build JSON payload
-    # NOTE: Using v1 API with 'id' parameter (DEPRECATED - kept for backward compatibility)
-    # New integrations should use v2 API with Firebase Auth tokens
     local json_data
-    json_data='{"id":"'"$(_wirepusher_escape_json "$user_id")"'","title":"'"$(_wirepusher_escape_json "$title")"'","message":"'"$(_wirepusher_escape_json "$message")"'"'
+    json_data='{"title":"'"$(_wirepusher_escape_json "$title")"'","message":"'"$(_wirepusher_escape_json "$message")"'"'
 
     # Add optional fields
     if [ -n "$notification_type" ]; then

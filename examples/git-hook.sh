@@ -10,7 +10,6 @@
 #   2. Make it executable: chmod +x .git/hooks/post-receive
 #   3. Set environment variables in .git/hooks/post-receive:
 #      export WIREPUSHER_TOKEN="wpt_your_token"
-#      export WIREPUSHER_ID="your_user_id"
 #
 # Or for a pre-commit hook that checks for TODOs:
 #   Copy to .git/hooks/pre-commit

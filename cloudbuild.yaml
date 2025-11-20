@@ -158,7 +158,7 @@ steps:
 
           RESPONSE=$(curl -fsSL -X POST \
             -H "Content-Type: application/json" \
-            -d "{\"id\":\"$_WIREPUSHER_ID\",\"title\":\"Shell Scripts $TAG_NAME Released\",\"message\":\"WirePusher Shell Scripts $VERSION has been released\",\"type\":\"release\",\"tags\":[\"sh\",\"release\"],\"image_url\":\"https://gitlab.com/uploads/-/system/project/avatar/70585915/shell.png\",\"action_url\":\"https://gitlab.com/wirepusher/wirepusher-sh/-/tags/$TAG_NAME\"}" \
+            -d "{\"title\":\"Shell Scripts $TAG_NAME Released\",\"message\":\"WirePusher Shell Scripts $VERSION has been released\",\"type\":\"release\",\"tags\":[\"sh\",\"release\"],\"image_url\":\"https://gitlab.com/uploads/-/system/project/avatar/70585915/shell.png\",\"action_url\":\"https://gitlab.com/wirepusher/wirepusher-sh/-/tags/$TAG_NAME\"}" \
             -w "%{http_code}" \
             -o /tmp/response.json \
             --max-time 30 \
@@ -196,7 +196,6 @@ timeout: 300s
 # Substitutions for notification
 substitutions:
   _WIREPUSHER_TOKEN: ""  # Set this in Cloud Build trigger settings (from Secret Manager)
-  _WIREPUSHER_ID: ""     # Set this in Cloud Build trigger settings (from Secret Manager)
 
 # Build options
 options:

@@ -129,8 +129,7 @@ print_instructions() {
     printf "     ${YELLOW}. %s/wirepusher.sh${NC}\n\n" "$INSTALL_DIR"
 
     printf "  2. Set environment variables:\n"
-    printf "     ${YELLOW}export WIREPUSHER_TOKEN='wpt_your_token'${NC}\n"
-    printf "     ${YELLOW}export WIREPUSHER_ID='your_user_id'${NC}\n\n"
+    printf "     ${YELLOW}export WIREPUSHER_TOKEN='wpt_your_token'${NC}\n\n"
 
     printf "  3. Send notifications:\n"
     printf "     ${YELLOW}wirepusher_send 'Title' 'Message'${NC}\n\n"

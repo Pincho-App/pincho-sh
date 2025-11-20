@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **Documentation overhaul** - Complete redesign and streamlining of documentation (35% reduction overall)
+  - **WIREPUSHER_ID removed** - Eliminated all references to deprecated v1 API user ID parameter (27 occurrences across 9 files)
+  - `README.md` - Redesigned from 572 to 184 lines (68% reduction) following SDK best practices
+  - `docs/ADVANCED.md` - Streamlined from 762 to 650 lines (15% reduction) with improved organization
+  - `examples/README.md` - Condensed from 479 to 182 lines (62% reduction) focusing on practical examples
+  - Improved navigation and cross-linking between documentation files
+  - Better separation of concerns (basic → README, advanced → ADVANCED.md, security → SECURITY.md)
+
 ### Added
 - **Rate limit monitoring** - Automatic parsing and export of rate limit headers after each API call
   - `WIREPUSHER_LAST_RATE_LIMIT` - Total requests allowed per hour
@@ -43,7 +52,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `wirepusher_send()` function with:
   - Positional arguments support (title, message)
   - Named arguments support (--title, --message, --type, --tag, --image, --action)
-  - Environment variable configuration (WIREPUSHER_TOKEN, WIREPUSHER_ID)
+  - Environment variable configuration (WIREPUSHER_TOKEN)
   - Comprehensive error handling with specific exit codes
   - JSON escaping for special characters
   - curl-based HTTP client with proper error handling
@@ -74,7 +83,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Validation** - Title/message length, required fields, tag count
 - **Multiple tags** - Support for up to 10 tags
 - **Optional fields** - Type, tags, image URL, action URL
-- **Environment configuration** - WIREPUSHER_TOKEN, WIREPUSHER_ID, WIREPUSHER_URL
+- **Environment configuration** - WIREPUSHER_TOKEN, WIREPUSHER_URL
 
 [Unreleased]: https://gitlab.com/wirepusher/wirepusher-sh/-/compare/v1.0.0...main
 [1.0.0]: https://gitlab.com/wirepusher/wirepusher-sh/-/tags/v1.0.0

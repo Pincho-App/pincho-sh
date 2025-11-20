@@ -13,12 +13,11 @@ set -e
 . ../wirepusher.sh
 
 # Check if credentials are set
-if [ -z "$WIREPUSHER_TOKEN" ] || [ -z "$WIREPUSHER_ID" ]; then
-    echo "Error: Please set WIREPUSHER_TOKEN and WIREPUSHER_ID environment variables" >&2
+if [ -z "$WIREPUSHER_TOKEN" ]; then
+    echo "Error: Please set WIREPUSHER_TOKEN environment variable" >&2
     echo "" >&2
     echo "Example:" >&2
     echo "  export WIREPUSHER_TOKEN='wpt_your_token'" >&2
-    echo "  export WIREPUSHER_ID='your_user_id'" >&2
     exit 1
 fi
 

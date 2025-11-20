@@ -19,7 +19,6 @@ TESTS_FAILED=0
 
 # Mock environment variables for testing
 export WIREPUSHER_TOKEN="test_token"
-export WIREPUSHER_ID="test_user_id"
 export WIREPUSHER_URL="http://localhost:9999/send"  # Non-existent URL for safety
 
 # Source the library
@@ -124,27 +123,6 @@ test_validation_missing_token() {
     fi
 }
 
-# Test: Validation - missing user ID
-test_validation_missing_user_id() {
-    test_start "Validation error on missing user ID"
-
-    # Temporarily unset user ID
-    old_id="$WIREPUSHER_ID"
-    unset WIREPUSHER_ID
-
-    output=$(wirepusher_send "Title" "Message" 2>&1)
-    exit_code=$?
-
-    # Restore user ID
-    export WIREPUSHER_ID="$old_id"
-
-    if [ $exit_code -eq 2 ] && echo "$output" | grep -q "WIREPUSHER_ID"; then
-        test_pass
-    else
-        test_fail "Expected validation error for missing user ID"
-    fi
-}
-
 # Test: Validation - title too long
 test_validation_title_too_long() {
     test_start "Validation error on title too long"
@@ -226,7 +204,6 @@ run_tests() {
     test_validation_missing_title
     test_validation_missing_message
     test_validation_missing_token
-    test_validation_missing_user_id
     test_validation_title_too_long
     test_validation_message_too_long
     test_named_arguments

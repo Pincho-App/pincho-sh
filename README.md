@@ -2,25 +2,12 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Official shell script library for [WirePusher](https://wirepusher.dev) - Send push notifications from shell scripts, cron jobs, and automation workflows.
-
-## Features
-
-- **POSIX sh Compatible** - Works on any Unix-like system (Linux, macOS, BSD, Alpine)
-- **Zero Dependencies** - Only requires curl (pre-installed on most systems)
-- **Production Ready** - Comprehensive error handling and exit codes
-- **CI/CD Ready** - Perfect for GitLab CI, GitHub Actions, Jenkins, cron jobs
+Official shell script library for [WirePusher](https://wirepusher.dev) - Send push notifications from shell scripts, cron jobs, and automation workflows. POSIX sh compatible, zero dependencies (only curl).
 
 ## Installation
 
 ```bash
 curl -sL https://gitlab.com/wirepusher/wirepusher-sh/-/raw/main/install.sh | sh
-```
-
-Or with sudo for system-wide installation:
-
-```bash
-curl -sL https://gitlab.com/wirepusher/wirepusher-sh/-/raw/main/install.sh | sudo sh
 ```
 
 **Get your token:** Open app → Settings → Help → copy token
@@ -40,142 +27,68 @@ wirepusher_send "Deploy Complete" "Version 1.2.3 deployed to production"
 
 ## Usage
 
-### Basic Notification
-
 ```bash
 #!/bin/sh
 . /usr/local/lib/wirepusher/wirepusher.sh
 
-# Simple notification
-wirepusher_send "Build Complete" "v1.2.3 deployed successfully"
-```
+# Basic notification
+wirepusher_send "Title" "Message"
 
-### With Options
-
-```bash
-# Full-featured notification
+# With all options
 wirepusher_send \
   --title "Deploy Complete" \
-  --message "Version 1.2.3 deployed to production" \
+  --message "Version 1.2.3 deployed" \
   --type "deployment" \
   --tag "prod" \
   --tag "release" \
-  --image "https://example.com/success.png" \
-  --action "https://example.com/deployment/123"
-```
-
-### Error Handling
-
-```bash
-if wirepusher_send "Deploy Complete" "Version 1.2.3 deployed"; then
-    echo "✅ Notification sent successfully"
-else
-    exit_code=$?
-    case $exit_code in
-        1) echo "❌ Authentication failed" ;;
-        2) echo "❌ Validation error" ;;
-        3) echo "⚠️  Rate limit exceeded" ;;
-        4) echo "❌ Network error" ;;
-    esac
-fi
+  --image "https://example.com/image.png" \
+  --action "https://example.com/dashboard"
 ```
 
 ## API Reference
 
 ### `wirepusher_send`
 
-Send a notification to WirePusher.
-
 **Arguments:**
+- `--title TEXT` - Title (required, max 256 chars)
+- `--message TEXT` - Message (required, max 4096 chars)
+- `--type TEXT` - Type for categorization
+- `--tag TEXT` - Tag (repeatable, max 10)
+- `--image URL` - Image URL
+- `--action URL` - Action URL
+- `--token TEXT` - API token (overrides `WIREPUSHER_TOKEN` env var)
 
-- `--title TEXT` - Notification title (required, max 256 chars)
-- `--message TEXT` - Notification message (required, max 4096 chars)
-- `--type TEXT` - Notification type for categorization
-- `--tag TEXT` - Add a tag (can be repeated, max 10 tags)
-- `--image URL` - Image URL to display
-- `--action URL` - Action URL to open when tapped
-- `--token TEXT` - API token (overrides `WIREPUSHER_TOKEN`)
+**Exit codes:** 0=success, 1=auth error, 2=validation error, 3=rate limit, 4=network error
 
-**Exit Codes:**
+**Shorthand:** `wirepusher_send "Title" "Message"`
 
-- `0` - Success
-- `1` - Authentication error (401, 403)
-- `2` - Validation error (400, 404)
-- `3` - Rate limit error (429)
-- `4` - Network or other error
-
-**Shorthand (positional arguments):**
-
-```bash
-wirepusher_send "Title" "Message"
-```
-
-### Other Functions
-
-- `wirepusher_version` - Print library version
-- `wirepusher_check_dependencies` - Check if curl is installed
-
-## Environment Variables
-
-- `WIREPUSHER_TOKEN` - Your API token (required)
-- `WIREPUSHER_URL` - API endpoint (default: https://wirepusher.com/send)
-
-Rate limit info (exported after each request):
-- `WIREPUSHER_LAST_RATE_LIMIT` - Total requests allowed per hour
-- `WIREPUSHER_LAST_RATE_REMAINING` - Requests remaining
-- `WIREPUSHER_LAST_RATE_RESET` - Unix timestamp when limit resets
+**Environment variables:**
+- `WIREPUSHER_TOKEN` (required) - Your API token
+- `WIREPUSHER_URL` (optional) - API endpoint (default: https://wirepusher.com/send)
+- `WIREPUSHER_LAST_RATE_*` (exported) - Rate limit info after each request
 
 ## Bash Version
 
-For bash-specific features (better array handling):
-
-```bash
-#!/usr/bin/env bash
-. /usr/local/lib/wirepusher/wirepusher-bash.sh
-
-wirepusher_send --title "Test" --message "Message" --tag "tag1" --tag "tag2"
-```
-
-Requires Bash 3.2+ (pre-installed on macOS and most Linux systems).
+For better array handling: `. /usr/local/lib/wirepusher/wirepusher-bash.sh` (requires Bash 3.2+)
 
 ## Encryption
 
-⚠️ **Encryption not supported** in shell scripts due to OpenSSL dependency requirements.
-
-For encryption support, use:
-- [CLI tool](https://gitlab.com/wirepusher/cli) - Shell-friendly with encryption
-- Language SDKs (Go, Python, PHP) - Native encryption support
+Not supported in shell scripts. Use [CLI tool](https://gitlab.com/wirepusher/cli) or language SDKs (Go, Python, PHP) for encryption.
 
 ## Examples
 
-See [examples/](examples/) directory for complete scripts:
-
-- `simple.sh` - Basic usage
-- `cron-job.sh` - System monitoring
-- `git-hook.sh` - Git push notifications
-- `ci-pipeline.sh` - CI/CD workflows
-- `monitoring.sh` - Health checks
-- `error-handling.sh` - Retry logic and error handling
-- `rate-limits.sh` - Rate limit tracking
+See [examples/](examples/) directory for complete scripts: cron jobs, git hooks, CI/CD, monitoring, error handling, rate limits, parallel sending.
 
 ## Documentation
 
-- [Advanced Usage](docs/ADVANCED.md) - Patterns, best practices, troubleshooting
-- [Examples Guide](examples/README.md) - Detailed examples and use cases
+- [Advanced Usage](docs/ADVANCED.md) - Error handling, integrations, best practices
+- [Examples Guide](examples/README.md) - Detailed example walkthrough
 - [Security](docs/SECURITY.md) - Security best practices
-- [Contributing](docs/CONTRIBUTING.md) - Development guide
-
-## Requirements
-
-- POSIX sh or Bash 3.2+
-- curl (pre-installed on most systems)
 
 ## Links
 
 - **Website**: https://wirepusher.dev
-- **Documentation**: https://wirepusher.dev/help
 - **Repository**: https://gitlab.com/wirepusher/wirepusher-sh
-- **Issues**: https://gitlab.com/wirepusher/wirepusher-sh/-/issues
 - **CLI Tool**: https://gitlab.com/wirepusher/cli
 
 ## License

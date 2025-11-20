@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `WIREPUSHER_LAST_RATE_REMAINING` - Requests remaining in current window
   - `WIREPUSHER_LAST_RATE_RESET` - Unix timestamp when rate limit resets
 - `examples/rate-limits.sh` - Comprehensive example demonstrating rate limit monitoring and batch sending with rate limit awareness
+- `examples/error-handling.sh` - Comprehensive error handling patterns with retry logic, exponential backoff, and error-specific recovery strategies
+- `examples/parallel-send.sh` - Parallel notification sending using xargs and GNU parallel with performance comparison and rate limit awareness
 - **Documentation** - Added comprehensive documentation:
   - `docs/SECURITY.md` - Security best practices for shell script users (225 lines)
   - `docs/ADVANCED.md` - Advanced usage patterns and integrations (675 lines)

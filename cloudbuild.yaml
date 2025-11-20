@@ -1,0 +1,204 @@
+# Google Cloud Build configuration for WirePusher Shell Scripts
+#
+# This configuration lints and tests the shell script library.
+#
+# Triggers:
+# - Push to main branch: Lint and test
+# - Git tag (v*): Lint, test, and send release notification
+#
+# Tests include:
+# - ShellCheck linting for both POSIX and Bash versions
+# - Multi-shell compatibility testing (sh, bash, dash)
+# - Test suite execution
+#
+
+steps:
+  # Step 1: ShellCheck linting for POSIX version
+  - name: "koalaman/shellcheck-alpine:stable"
+    id: "shellcheck-posix"
+    entrypoint: "sh"
+    args:
+      - "-c"
+      - |
+        echo "=== ShellCheck: wirepusher.sh (POSIX) ==="
+        shellcheck -s sh -e SC2006 wirepusher.sh
+        echo "✅ POSIX version passed ShellCheck"
+
+  # Step 2: ShellCheck linting for Bash version
+  - name: "koalaman/shellcheck-alpine:stable"
+    id: "shellcheck-bash"
+    entrypoint: "sh"
+    args:
+      - "-c"
+      - |
+        echo "=== ShellCheck: wirepusher-bash.sh (Bash) ==="
+        shellcheck -s bash -e SC2006 wirepusher-bash.sh
+        echo "✅ Bash version passed ShellCheck"
+    waitFor: ["shellcheck-posix"]
+
+  # Step 3: ShellCheck linting for examples
+  - name: "koalaman/shellcheck-alpine:stable"
+    id: "shellcheck-examples"
+    entrypoint: "sh"
+    args:
+      - "-c"
+      - |
+        echo "=== ShellCheck: examples/*.sh ==="
+        for script in examples/*.sh; do
+          echo "Checking: $script"
+          shellcheck -s sh -e SC2006 "$script"
+        done
+        echo "✅ All examples passed ShellCheck"
+    waitFor: ["shellcheck-bash"]
+
+  # Step 4: Test with POSIX sh (dash)
+  - name: "alpine:latest"
+    id: "test-posix-dash"
+    entrypoint: "sh"
+    args:
+      - "-c"
+      - |
+        echo "=== Testing with POSIX sh (dash) ==="
+        cd tests
+        sh test.sh
+        echo "✅ Tests passed with dash"
+    waitFor: ["shellcheck-examples"]
+
+  # Step 5: Test with Bash
+  - name: "bash:5.2"
+    id: "test-bash"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        echo "=== Testing with Bash 5.2 ==="
+        cd tests
+        bash test.sh
+        echo "✅ Tests passed with bash"
+    waitFor: ["shellcheck-examples"]
+
+  # Step 6: Test Bash-specific version
+  - name: "bash:5.2"
+    id: "test-bash-enhanced"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        echo "=== Testing Bash-enhanced version ==="
+        # Create a test script that uses the Bash version
+        cat > /tmp/test-bash-enhanced.sh << 'EOF'
+        #!/bin/bash
+        set -e
+        . ./wirepusher-bash.sh
+        wirepusher_version
+        echo "✅ Bash-enhanced version loaded successfully"
+        EOF
+        bash /tmp/test-bash-enhanced.sh
+        echo "✅ Bash-enhanced tests passed"
+    waitFor: ["test-bash"]
+
+  # Step 7: Verify examples syntax (don't execute, just check for syntax errors)
+  - name: "bash:5.2"
+    id: "verify-examples"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        echo "=== Verifying example script syntax ==="
+        for script in examples/*.sh; do
+          echo "Checking syntax: $script"
+          bash -n "$script"
+        done
+        echo "✅ All examples have valid syntax"
+    waitFor: ["test-bash-enhanced"]
+
+  # Step 8: Generate release artifacts and send notification (tagged releases only)
+  - name: "alpine:latest"
+    id: "release"
+    entrypoint: "sh"
+    args:
+      - "-c"
+      - |
+        # Only run on tagged releases
+        if [ -z "$TAG_NAME" ]; then
+          echo "=== No Release Actions ==="
+          echo "Skipping release actions (only runs on release tags like v1.0.0)"
+          exit 0
+        fi
+
+        echo "=== Release: $TAG_NAME ==="
+
+        # Install curl for sending notification
+        apk add --no-cache curl
+
+        # Extract version from tag (remove 'v' prefix)
+        VERSION=$(echo "$TAG_NAME" | sed 's/^v//')
+        echo "Version: $VERSION"
+
+        # Create release artifact (tarball)
+        ARTIFACT="wirepusher-shell-scripts-$VERSION.tar.gz"
+        tar czf "$ARTIFACT" \
+          wirepusher.sh \
+          wirepusher-bash.sh \
+          install.sh \
+          examples/ \
+          tests/ \
+          docs/ \
+          README.md \
+          CHANGELOG.md \
+          LICENSE \
+          CLAUDE.md
+
+        echo "Created: $ARTIFACT"
+        ls -lh "$ARTIFACT"
+
+        # Send release notification (if WIREPUSHER_TOKEN is available)
+        if [ -n "$_WIREPUSHER_TOKEN" ]; then
+          echo "Sending release notification..."
+
+          RESPONSE=$(curl -fsSL -X POST \
+            -H "Content-Type: application/json" \
+            -d "{\"id\":\"$_WIREPUSHER_ID\",\"title\":\"Shell Scripts $TAG_NAME Released\",\"message\":\"WirePusher Shell Scripts $VERSION has been released\",\"type\":\"release\",\"tags\":[\"shell-scripts\",\"release\"],\"image_url\":\"https://gitlab.com/uploads/-/system/project/avatar/70585915/shell.png\",\"action_url\":\"https://gitlab.com/wirepusher/shell-scripts/-/tags/$TAG_NAME\"}" \
+            -w "%{http_code}" \
+            -o /tmp/response.json \
+            --max-time 30 \
+            "https://wirepusher.com/send?type=wirepusher&token=$_WIREPUSHER_TOKEN" || true)
+
+          if [ "$RESPONSE" = "200" ] || [ "$RESPONSE" = "201" ]; then
+            echo "✅ Release notification sent"
+          else
+            echo "⚠️ Failed to send release notification (HTTP $RESPONSE)"
+            cat /tmp/response.json || true
+          fi
+        else
+          echo "⚠️ WIREPUSHER_TOKEN not set, skipping notification"
+        fi
+
+        echo "✅ Release complete"
+        echo ""
+        echo "Installation:"
+        echo "  curl -fsSL https://wirepusher.dev/install.sh | sh"
+        echo ""
+        echo "Documentation:"
+        echo "  https://gitlab.com/wirepusher/shell-scripts"
+    waitFor: ["verify-examples"]
+
+# Build artifacts (release tarballs)
+artifacts:
+  objects:
+    location: "gs://${PROJECT_ID}_cloudbuild/shell-scripts/${BUILD_ID}"
+    paths:
+      - "*.tar.gz"
+
+# Build timeout (5 minutes should be plenty for shell scripts)
+timeout: 300s
+
+# Substitutions for notification
+substitutions:
+  _WIREPUSHER_TOKEN: ""  # Set this in Cloud Build trigger settings (from Secret Manager)
+  _WIREPUSHER_ID: ""     # Set this in Cloud Build trigger settings (from Secret Manager)
+
+# Build options
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: "E2_HIGHCPU_8"  # Fast machine for parallel testing

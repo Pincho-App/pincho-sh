@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Documentation** - Added comprehensive documentation:
   - `docs/SECURITY.md` - Security best practices for shell script users (225 lines)
   - `docs/ADVANCED.md` - Advanced usage patterns and integrations (675 lines)
+  - `docs/CODE_OF_CONDUCT.md` - Community guidelines based on Contributor Covenant 2.1
   - `examples/README.md` - Complete documentation for all 6 examples (480 lines)
   - `CLAUDE.md` - AI assistant context with architecture and design decisions (390 lines)
 

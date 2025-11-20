@@ -116,19 +116,6 @@ Send multiple notifications efficiently:
 
 Demonstrates: sequential batch, parallel with xargs, GNU parallel
 
-### notifai.sh - AI Text-to-Notification
-
-Convert free-form text to structured notifications:
-```bash
-./notifai.sh
-
-# Examples:
-# wirepusher_notifai "Deploy server and restart services"
-# wirepusher_notifai --text "SSL cert expires in 7 days" --type "security"
-```
-
-Demonstrates: NotifAI endpoint, AI conversion, multiple text formats
-
 ## Common Patterns
 
 **Token configuration:**

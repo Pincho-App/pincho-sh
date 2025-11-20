@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Rate limit monitoring** - Automatic parsing and export of rate limit headers after each API call
+  - `WIREPUSHER_LAST_RATE_LIMIT` - Total requests allowed per hour
+  - `WIREPUSHER_LAST_RATE_REMAINING` - Requests remaining in current window
+  - `WIREPUSHER_LAST_RATE_RESET` - Unix timestamp when rate limit resets
+- `examples/rate-limits.sh` - Comprehensive example demonstrating rate limit monitoring and batch sending with rate limit awareness
+- **Documentation** - Added comprehensive documentation:
+  - `docs/SECURITY.md` - Security best practices for shell script users (225 lines)
+  - `docs/ADVANCED.md` - Advanced usage patterns and integrations (675 lines)
+  - `examples/README.md` - Complete documentation for all 6 examples (480 lines)
+  - `CLAUDE.md` - AI assistant context with architecture and design decisions (390 lines)
+
+### Changed
+- Updated header comments in both `wirepusher.sh` and `wirepusher-bash.sh` to document rate limit environment variables
+
 ## [1.0.0] - 2025-10-26
 
 ### Added

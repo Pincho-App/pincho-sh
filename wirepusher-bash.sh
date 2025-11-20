@@ -19,6 +19,11 @@
 #                      DEPRECATED: v1 API - Use token-based authentication for new integrations
 #   WIREPUSHER_URL   - API URL (default: https://wirepusher.com/send)
 #
+# Rate limit variables (exported after each API call):
+#   WIREPUSHER_LAST_RATE_LIMIT     - Total requests allowed per hour
+#   WIREPUSHER_LAST_RATE_REMAINING - Requests remaining in current window
+#   WIREPUSHER_LAST_RATE_RESET     - Unix timestamp when rate limit resets
+#
 # Exit codes:
 #   0 - Success
 #   1 - Authentication error (401, 403)
@@ -52,6 +57,37 @@ _wirepusher_escape_json() {
     # Escape tabs
     str="${str//$'\t'/\\t}"
     printf '%s' "$str"
+}
+
+# Parse rate limit headers from curl response
+# Exports environment variables with rate limit information
+_wirepusher_parse_rate_limit_headers() {
+    local headers_file="$1"
+
+    if [ ! -f "$headers_file" ]; then
+        return 0
+    fi
+
+    # Extract rate limit headers (case-insensitive)
+    local limit=$(grep -i '^x-ratelimit-limit:' "$headers_file" | sed 's/^[^:]*:[[:space:]]*//' | tr -d '\r')
+    local remaining=$(grep -i '^x-ratelimit-remaining:' "$headers_file" | sed 's/^[^:]*:[[:space:]]*//' | tr -d '\r')
+    local reset=$(grep -i '^x-ratelimit-reset:' "$headers_file" | sed 's/^[^:]*:[[:space:]]*//' | tr -d '\r')
+
+    # Export to environment variables if found
+    if [ -n "$limit" ]; then
+        WIREPUSHER_LAST_RATE_LIMIT="$limit"
+        export WIREPUSHER_LAST_RATE_LIMIT
+    fi
+
+    if [ -n "$remaining" ]; then
+        WIREPUSHER_LAST_RATE_REMAINING="$remaining"
+        export WIREPUSHER_LAST_RATE_REMAINING
+    fi
+
+    if [ -n "$reset" ]; then
+        WIREPUSHER_LAST_RATE_RESET="$reset"
+        export WIREPUSHER_LAST_RATE_RESET
+    fi
 }
 
 # Send a notification to WirePusher
@@ -213,9 +249,11 @@ wirepusher_send() {
     local response
     local http_code
     local temp_file
+    local headers_file
 
-    # Create temp file for response
+    # Create temp files for response and headers
     temp_file=$(mktemp)
+    headers_file=$(mktemp)
 
     # Make the request
     http_code=$(curl -fsSL -X POST \
@@ -223,6 +261,7 @@ wirepusher_send() {
         -d "$json_data" \
         -w "%{http_code}" \
         -o "$temp_file" \
+        -D "$headers_file" \
         --max-time 30 \
         "${WIREPUSHER_URL}?type=wirepusher&token=${token}" 2>/dev/null)
 
@@ -232,6 +271,12 @@ wirepusher_send() {
     if [[ -f "$temp_file" ]]; then
         response=$(cat "$temp_file")
         rm -f "$temp_file"
+    fi
+
+    # Parse and export rate limit headers
+    if [[ -f "$headers_file" ]]; then
+        _wirepusher_parse_rate_limit_headers "$headers_file"
+        rm -f "$headers_file"
     fi
 
     # Check curl exit code

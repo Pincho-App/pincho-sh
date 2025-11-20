@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **NotifAI endpoint support** - AI-powered text-to-notification conversion
+  - `wirepusher_notifai()` function in both `wirepusher.sh` and `wirepusher-bash.sh`
+  - Converts free-form text (5-2500 chars) into structured notifications using AI
+  - Supports optional `--type` parameter for categorization
+  - Same error handling and rate limiting as `wirepusher_send()`
+  - Rate limit: 50 requests/hour per token
+  - `examples/notifai.sh` - Comprehensive example with 5 use cases
+  - Documentation in `README.md`, `docs/ADVANCED.md`, and `examples/README.md`
+
 ### Changed
 - **Documentation overhaul** - Complete redesign and streamlining of documentation (35% reduction overall)
   - **WIREPUSHER_ID removed** - Eliminated all references to deprecated v1 API user ID parameter (27 occurrences across 9 files)
@@ -15,8 +25,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `examples/README.md` - Condensed from 479 to 182 lines (62% reduction) focusing on practical examples
   - Improved navigation and cross-linking between documentation files
   - Better separation of concerns (basic → README, advanced → ADVANCED.md, security → SECURITY.md)
-
-### Added
 - **Rate limit monitoring** - Automatic parsing and export of rate limit headers after each API call
   - `WIREPUSHER_LAST_RATE_LIMIT` - Total requests allowed per hour
   - `WIREPUSHER_LAST_RATE_REMAINING` - Requests remaining in current window

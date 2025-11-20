@@ -67,6 +67,25 @@ wirepusher_send \
 - `WIREPUSHER_URL` (optional) - API endpoint (default: https://wirepusher.com/send)
 - `WIREPUSHER_LAST_RATE_*` (exported) - Rate limit info after each request
 
+### `wirepusher_notifai`
+
+Convert text to notifications using AI. Useful for automation workflows where you have free-form text that should become a structured notification.
+
+**Arguments:**
+- `--text TEXT` - Text to convert (required, 5-2500 chars)
+- `--type TEXT` - Type for categorization
+- `--token TEXT` - API token (overrides `WIREPUSHER_TOKEN` env var)
+
+**Exit codes:** Same as `wirepusher_send`
+
+**Shorthand:** `wirepusher_notifai "Deploy server and restart services"`
+
+**Example:**
+```bash
+wirepusher_notifai "SSL cert expires in 7 days - renew now"
+wirepusher_notifai --text "Build failed with 3 errors" --type "ci-cd"
+```
+
 ## Bash Version
 
 For better array handling: `. /usr/local/lib/wirepusher/wirepusher-bash.sh` (requires Bash 3.2+)

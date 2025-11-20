@@ -289,6 +289,166 @@ wirepusher_send() {
     esac
 }
 
+# Convert text to a notification using AI
+#
+# Usage:
+#   wirepusher_notifai "Deploy server and restart services"
+#   wirepusher_notifai --text "Check logs" --type "monitoring"
+#
+# Arguments:
+#   Positional: text
+#   Named:
+#     --text TEXT       - Text to convert (required, 5-2500 chars)
+#     --type TEXT       - Notification type for categorization
+#     --token TEXT      - API token (overrides WIREPUSHER_TOKEN)
+#
+# Returns:
+#   0 on success, non-zero on error
+wirepusher_notifai() {
+    local text=""
+    local notification_type=""
+    local token="${WIREPUSHER_TOKEN}"
+
+    # Parse arguments
+    if [ $# -eq 1 ] && [ "${1#--}" = "$1" ]; then
+        # Positional argument: text
+        text="$1"
+    else
+        # Named arguments
+        while [ $# -gt 0 ]; do
+            case "$1" in
+                --text)
+                    text="$2"
+                    shift 2
+                    ;;
+                --type)
+                    notification_type="$2"
+                    shift 2
+                    ;;
+                --token)
+                    token="$2"
+                    shift 2
+                    ;;
+                *)
+                    echo "Error: Unknown argument '$1'" >&2
+                    echo "Usage: wirepusher_notifai [--text TEXT] [options]" >&2
+                    return 4
+                    ;;
+            esac
+        done
+    fi
+
+    # Validate required parameters
+    if [ -z "$text" ]; then
+        echo "Error: Text is required" >&2
+        return 2
+    fi
+
+    if [ -z "$token" ]; then
+        echo "Error: WIREPUSHER_TOKEN environment variable or --token argument is required" >&2
+        return 2
+    fi
+
+    # Validate text length
+    text_len=$(printf '%s' "$text" | wc -c | tr -d ' ')
+    if [ "$text_len" -lt 5 ]; then
+        echo "Error: Text must be at least 5 characters (got $text_len)" >&2
+        return 2
+    fi
+    if [ "$text_len" -gt 2500 ]; then
+        echo "Error: Text must be 2500 characters or less (got $text_len)" >&2
+        return 2
+    fi
+
+    # Build JSON payload
+    local json_data
+    json_data='{"text":"'"$(_wirepusher_escape_json "$text")"'"'
+
+    # Add optional type field
+    if [ -n "$notification_type" ]; then
+        json_data="${json_data},\"type\":\"$(_wirepusher_escape_json "$notification_type")\""
+    fi
+
+    json_data="${json_data}}"
+
+    # Send request with curl
+    local response
+    local http_code
+    local temp_file
+    local headers_file
+
+    # Create temp files for response and headers
+    temp_file=$(mktemp)
+    headers_file=$(mktemp)
+
+    # Determine the base URL (remove /send if present, add /notifai)
+    local base_url="${WIREPUSHER_URL%/send}"
+    local notifai_url="${base_url}/notifai"
+
+    # Make the request
+    http_code=$(curl -fsSL -X POST \
+        -H "Content-Type: application/json" \
+        -d "$json_data" \
+        -w "%{http_code}" \
+        -o "$temp_file" \
+        -D "$headers_file" \
+        --max-time 30 \
+        "${notifai_url}?type=wirepusher&token=${token}" 2>/dev/null)
+
+    local curl_exit=$?
+
+    # Read response
+    if [ -f "$temp_file" ]; then
+        response=$(cat "$temp_file")
+        rm -f "$temp_file"
+    fi
+
+    # Parse and export rate limit headers
+    if [ -f "$headers_file" ]; then
+        _wirepusher_parse_rate_limit_headers "$headers_file"
+        rm -f "$headers_file"
+    fi
+
+    # Check curl exit code
+    if [ $curl_exit -ne 0 ]; then
+        echo "Error: Request failed (curl exit code: $curl_exit)" >&2
+        return 4
+    fi
+
+    # Check HTTP status code
+    case "$http_code" in
+        200|201|202)
+            # Success
+            echo "$response"
+            return 0
+            ;;
+        401|403)
+            # Authentication error
+            echo "Error: Authentication failed (HTTP $http_code)" >&2
+            [ -n "$response" ] && echo "Response: $response" >&2
+            return 1
+            ;;
+        400|404)
+            # Validation error
+            echo "Error: Validation failed (HTTP $http_code)" >&2
+            [ -n "$response" ] && echo "Response: $response" >&2
+            return 2
+            ;;
+        429)
+            # Rate limit
+            echo "Error: Rate limit exceeded (HTTP $http_code)" >&2
+            [ -n "$response" ] && echo "Response: $response" >&2
+            return 3
+            ;;
+        *)
+            # Other error
+            echo "Error: Request failed (HTTP $http_code)" >&2
+            [ -n "$response" ] && echo "Response: $response" >&2
+            return 4
+            ;;
+    esac
+}
+
 # Print library version
 wirepusher_version() {
     echo "WirePusher Shell Script Library v1.0.0"

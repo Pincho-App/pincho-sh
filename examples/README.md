@@ -460,7 +460,7 @@ chmod +x example-name.sh
 - **Documentation**: See [README.md](../README.md) for full documentation
 - **Advanced patterns**: See [docs/ADVANCED.md](../docs/ADVANCED.md)
 - **Security**: See [docs/SECURITY.md](../docs/SECURITY.md)
-- **Issues**: Report bugs at https://gitlab.com/wirepusher/shell-scripts/-/issues
+- **Issues**: Report bugs at https://gitlab.com/wirepusher/wirepusher-sh/-/issues
 - **Support**: Email support@wirepusher.dev
 
 ## Contributing Examples

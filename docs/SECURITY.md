@@ -20,7 +20,7 @@ The WirePusher team takes security bugs seriously. We appreciate your efforts to
 Instead, please report security vulnerabilities by:
 
 1. **Opening a confidential issue** on GitLab:
-   - Go to https://gitlab.com/wirepusher/shell-scripts/-/issues/new
+   - Go to https://gitlab.com/wirepusher/wirepusher-sh/-/issues/new
    - Check the "This issue is confidential" checkbox
    - Provide detailed information about the vulnerability
 

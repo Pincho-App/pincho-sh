@@ -17,13 +17,13 @@ Official shell script library for [WirePusher](https://wirepusher.dev) - Send pu
 ### Quick Install
 
 ```bash
-curl -sL https://gitlab.com/wirepusher/shell-scripts/-/raw/main/install.sh | sh
+curl -sL https://gitlab.com/wirepusher/wirepusher-sh/-/raw/main/install.sh | sh
 ```
 
 Or with sudo for system-wide installation:
 
 ```bash
-curl -sL https://gitlab.com/wirepusher/shell-scripts/-/raw/main/install.sh | sudo sh
+curl -sL https://gitlab.com/wirepusher/wirepusher-sh/-/raw/main/install.sh | sudo sh
 ```
 
 ### Custom Install Location
@@ -37,7 +37,7 @@ INSTALL_DIR=~/.local/lib/wirepusher sh install.sh
 ```bash
 # Download the library
 curl -o /usr/local/lib/wirepusher/wirepusher.sh \
-  https://gitlab.com/wirepusher/shell-scripts/-/raw/main/wirepusher.sh
+  https://gitlab.com/wirepusher/wirepusher-sh/-/raw/main/wirepusher.sh
 
 # Make it executable
 chmod +x /usr/local/lib/wirepusher/wirepusher.sh
@@ -445,8 +445,8 @@ fi
 
 ```bash
 # Clone repository
-git clone https://gitlab.com/wirepusher/shell-scripts.git
-cd shell-scripts
+git clone https://gitlab.com/wirepusher/wirepusher-sh.git
+cd wirepusher-sh
 ```
 
 ### Testing
@@ -562,8 +562,8 @@ curl -I https://wirepusher.com
 ## Links
 
 - **Documentation**: https://wirepusher.dev/help
-- **Repository**: https://gitlab.com/wirepusher/shell-scripts
-- **Issues**: https://gitlab.com/wirepusher/shell-scripts/-/issues
+- **Repository**: https://gitlab.com/wirepusher/wirepusher-sh
+- **Issues**: https://gitlab.com/wirepusher/wirepusher-sh/-/issues
 - **CLI (with encryption)**: https://gitlab.com/wirepusher/cli
 - **Website**: https://wirepusher.dev
 

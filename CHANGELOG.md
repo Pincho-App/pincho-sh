@@ -29,6 +29,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `CLAUDE.md` - AI assistant context with architecture and design decisions (390 lines)
 
 ### Changed
+- **Repository renamed** from `shell-scripts` to `wirepusher-sh` to align with SDK naming convention (`wirepusher-{language}`)
+  - All documentation and URLs updated
+  - GitLab automatically redirects old URLs to new repository name
 - Updated header comments in both `wirepusher.sh` and `wirepusher-bash.sh` to document rate limit environment variables
 
 ## [1.0.0] - 2025-10-26
@@ -73,5 +76,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Optional fields** - Type, tags, image URL, action URL
 - **Environment configuration** - WIREPUSHER_TOKEN, WIREPUSHER_ID, WIREPUSHER_URL
 
-[Unreleased]: https://gitlab.com/wirepusher/shell-scripts/-/compare/v1.0.0...main
-[1.0.0]: https://gitlab.com/wirepusher/shell-scripts/-/tags/v1.0.0
+[Unreleased]: https://gitlab.com/wirepusher/wirepusher-sh/-/compare/v1.0.0...main
+[1.0.0]: https://gitlab.com/wirepusher/wirepusher-sh/-/tags/v1.0.0

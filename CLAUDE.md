@@ -14,7 +14,7 @@ Context file for AI-powered development assistance on the WirePusher shell scrip
 ## Architecture
 
 ```
-shell-scripts/
+wirepusher-sh/
 ├── wirepusher.sh              # POSIX sh compatible (dash, ash, bash, zsh)
 ├── wirepusher-bash.sh         # Bash-enhanced version (4.0+)
 ├── install.sh                 # One-line installer
@@ -512,7 +512,7 @@ echo "Remaining: $WIREPUSHER_LAST_RATE_REMAINING"
 - **Examples**: [examples/README.md](examples/README.md) for usage examples
 - **Advanced usage**: [docs/ADVANCED.md](docs/ADVANCED.md) for patterns
 - **Security**: [docs/SECURITY.md](docs/SECURITY.md) for best practices
-- **Issues**: https://gitlab.com/wirepusher/shell-scripts/-/issues
+- **Issues**: https://gitlab.com/wirepusher/wirepusher-sh/-/issues
 - **Support**: support@wirepusher.dev
 
 ---

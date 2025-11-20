@@ -86,6 +86,6 @@ For answers to common questions about this code of conduct, see the FAQ at [http
 If you have questions or concerns about this Code of Conduct, please contact us at:
 
 - **Email**: support@wirepusher.dev
-- **GitLab Issues**: https://gitlab.com/wirepusher/shell-scripts/-/issues
+- **GitLab Issues**: https://gitlab.com/wirepusher/wirepusher-sh/-/issues
 
 We are committed to providing a welcoming and inspiring community for all.

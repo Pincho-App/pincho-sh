@@ -5,7 +5,7 @@
 # This script downloads and installs the WirePusher shell script library.
 #
 # Usage:
-#   curl -sL https://gitlab.com/wirepusher/shell-scripts/-/raw/main/install.sh | sh
+#   curl -sL https://gitlab.com/wirepusher/wirepusher-sh/-/raw/main/install.sh | sh
 #
 # Or with custom install location:
 #   INSTALL_DIR=/opt/wirepusher sh install.sh
@@ -29,7 +29,7 @@ else
 fi
 
 # Configuration
-REPO_URL="https://gitlab.com/wirepusher/shell-scripts/-/raw/main"
+REPO_URL="https://gitlab.com/wirepusher/wirepusher-sh/-/raw/main"
 DEFAULT_INSTALL_DIR="/usr/local/lib/wirepusher"
 INSTALL_DIR="${INSTALL_DIR:-$DEFAULT_INSTALL_DIR}"
 
@@ -137,10 +137,10 @@ print_instructions() {
 
     printf "${BLUE}Examples:${NC}\n"
     printf "  View examples at:\n"
-    printf "  https://gitlab.com/wirepusher/shell-scripts/-/tree/main/examples\n\n"
+    printf "  https://gitlab.com/wirepusher/wirepusher-sh/-/tree/main/examples\n\n"
 
     printf "${BLUE}Documentation:${NC}\n"
-    printf "  https://gitlab.com/wirepusher/shell-scripts\n\n"
+    printf "  https://gitlab.com/wirepusher/wirepusher-sh\n\n"
 
     # Suggest adding to shell profile
     if [ "$INSTALL_DIR" != "$DEFAULT_INSTALL_DIR" ]; then

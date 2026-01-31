@@ -1,6 +1,6 @@
 # Advanced Usage Guide
 
-Advanced patterns, integrations, and best practices for WirePusher shell scripts.
+Advanced patterns, integrations, and best practices for Pincho shell scripts.
 
 ## Table of Contents
 
@@ -29,7 +29,7 @@ Advanced patterns, integrations, and best practices for WirePusher shell scripts
 
 ```bash
 #!/bin/sh
-. ./wirepusher.sh
+. ./pincho.sh
 
 send_with_retry() {
     local title="$1"
@@ -41,7 +41,7 @@ send_with_retry() {
     while [ $attempt -le $max_attempts ]; do
         echo "Attempt $attempt of $max_attempts..."
 
-        if wirepusher_send "$title" "$message"; then
+        if pincho_send "$title" "$message"; then
             echo "Success on attempt $attempt"
             return 0
         fi
@@ -71,7 +71,7 @@ send_with_retry() {
 
 ```bash
 #!/bin/sh
-. ./wirepusher.sh
+. ./pincho.sh
 
 send_with_logging() {
     local title="$1"
@@ -81,7 +81,7 @@ send_with_logging() {
 
     timestamp=$(date '+%Y-%m-%d %H:%M:%S')
 
-    result=$(wirepusher_send "$title" "$message" 2>&1)
+    result=$(pincho_send "$title" "$message" 2>&1)
     exit_code=$?
 
     # Log to file
@@ -90,11 +90,11 @@ send_with_logging() {
         if [ $exit_code -ne 0 ]; then
             echo "[$timestamp] error: $result"
         fi
-    } >> /var/log/wirepusher.log
+    } >> /var/log/pincho.log
 
     # Log to syslog if available
     if command -v logger >/dev/null 2>&1; then
-        logger -t wirepusher -p user.info "Sent: title=\"$title\" status=$exit_code"
+        logger -t pincho -p user.info "Sent: title=\"$title\" status=$exit_code"
     fi
 
     return $exit_code
@@ -107,21 +107,21 @@ send_with_logging() {
 
 ```bash
 #!/bin/sh
-. ./wirepusher.sh
+. ./pincho.sh
 
 send_with_rate_check() {
     local title="$1"
     local message="$2"
 
-    wirepusher_send "$title" "$message"
+    pincho_send "$title" "$message"
     exit_code=$?
 
-    if [ -n "$WIREPUSHER_LAST_RATE_REMAINING" ]; then
-        echo "Rate limit: $WIREPUSHER_LAST_RATE_REMAINING remaining"
+    if [ -n "$PINCHO_LAST_RATE_REMAINING" ]; then
+        echo "Rate limit: $PINCHO_LAST_RATE_REMAINING remaining"
 
         # Warn if approaching limit
-        if [ "$WIREPUSHER_LAST_RATE_REMAINING" -lt 10 ]; then
-            echo "WARNING: Only $WIREPUSHER_LAST_RATE_REMAINING requests remaining!" >&2
+        if [ "$PINCHO_LAST_RATE_REMAINING" -lt 10 ]; then
+            echo "WARNING: Only $PINCHO_LAST_RATE_REMAINING requests remaining!" >&2
         fi
     fi
 
@@ -133,7 +133,7 @@ send_with_rate_check() {
 
 ```bash
 #!/bin/sh
-. ./wirepusher.sh
+. ./pincho.sh
 
 send_batch() {
     local file="$1"
@@ -141,7 +141,7 @@ send_batch() {
     local count=0
 
     while IFS='|' read -r title message; do
-        if wirepusher_send "$title" "$message"; then
+        if pincho_send "$title" "$message"; then
             count=$((count + 1))
             echo "Sent $count notifications"
 
@@ -163,11 +163,11 @@ send_batch() {
 
 ```bash
 #!/bin/sh
-. ./wirepusher.sh
+. ./pincho.sh
 
 # Read from file (format: title|message)
 while IFS='|' read -r title message; do
-    if ! wirepusher_send "$title" "$message"; then
+    if ! pincho_send "$title" "$message"; then
         echo "Failed: $title" >&2
     fi
     sleep 1  # Rate limiting: 1 second between sends
@@ -178,17 +178,17 @@ done < notifications.txt
 
 ```bash
 #!/bin/sh
-. ./wirepusher.sh
+. ./pincho.sh
 
 send_one() {
     local line="$1"
     local title="${line%%|*}"
     local message="${line#*|}"
-    wirepusher_send "$title" "$message"
+    pincho_send "$title" "$message"
 }
 
 export -f send_one
-export WIREPUSHER_TOKEN
+export PINCHO_TOKEN
 
 # Send 4 at a time
 cat notifications.txt | xargs -P 4 -I {} sh -c 'send_one "{}"'
@@ -198,16 +198,16 @@ cat notifications.txt | xargs -P 4 -I {} sh -c 'send_one "{}"'
 
 ```bash
 #!/bin/sh
-. ./wirepusher.sh
+. ./pincho.sh
 
 send_one() {
     local title="$1"
     local message="$2"
-    wirepusher_send "$title" "$message"
+    pincho_send "$title" "$message"
 }
 
-export -f send_one wirepusher_send
-export WIREPUSHER_TOKEN
+export -f send_one pincho_send
+export PINCHO_TOKEN
 
 # Process file with 4 parallel jobs
 parallel --colsep '|' send_one {1} {2} :::: notifications.txt
@@ -221,28 +221,28 @@ NotifAI uses AI to convert free-form text into structured notifications. Useful 
 
 ```bash
 #!/bin/sh
-. ./wirepusher.sh
+. ./pincho.sh
 
 # Convert simple text
-wirepusher_notifai "Deploy server and restart all services"
+pincho_notifai "Deploy server and restart all services"
 
 # With type
-wirepusher_notifai --text "SSL certificate expires in 7 days" --type "security"
+pincho_notifai --text "SSL certificate expires in 7 days" --type "security"
 
 # From command output
 disk_status=$(df -h / | tail -1)
-wirepusher_notifai "Disk status: $disk_status"
+pincho_notifai "Disk status: $disk_status"
 ```
 
 ### Processing Log Files
 
 ```bash
 #!/bin/sh
-. ./wirepusher.sh
+. ./pincho.sh
 
 # Send errors from log file
 tail -n 50 /var/log/app.log | grep ERROR | while read -r line; do
-    wirepusher_notifai "$line" --type "errors"
+    pincho_notifai "$line" --type "errors"
     sleep 1  # Rate limiting
 done
 ```
@@ -251,16 +251,16 @@ done
 
 ```bash
 #!/bin/sh
-. ./wirepusher.sh
+. ./pincho.sh
 
 # Convert build status to notification
 build_output=$(make build 2>&1 | tail -10)
 exit_code=$?
 
 if [ $exit_code -eq 0 ]; then
-    wirepusher_notifai "Build succeeded. $build_output" --type "ci-cd"
+    pincho_notifai "Build succeeded. $build_output" --type "ci-cd"
 else
-    wirepusher_notifai "Build failed with exit code $exit_code. $build_output" --type "ci-cd"
+    pincho_notifai "Build failed with exit code $exit_code. $build_output" --type "ci-cd"
 fi
 ```
 
@@ -268,7 +268,7 @@ fi
 
 ```bash
 #!/bin/sh
-. ./wirepusher.sh
+. ./pincho.sh
 
 # Check service health and convert to notification
 check_service() {
@@ -278,7 +278,7 @@ check_service() {
         status="running"
     else
         status="stopped"
-        wirepusher_notifai "Service $service is $status - requires attention" --type "monitoring"
+        pincho_notifai "Service $service is $status - requires attention" --type "monitoring"
     fi
 }
 
@@ -291,7 +291,7 @@ check_service "redis"
 
 ```bash
 #!/bin/sh
-. ./wirepusher.sh
+. ./pincho.sh
 
 # Aggregate system metrics
 cpu=$(top -bn1 | grep "Cpu(s)" | awk '{print $2}')
@@ -299,18 +299,18 @@ mem=$(free -m | awk 'NR==2{printf "%.1f%%", $3*100/$2}')
 disk=$(df -h / | awk 'NR==2{print $5}')
 
 status="System health check: CPU usage ${cpu}%, Memory usage ${mem}, Disk usage ${disk}"
-wirepusher_notifai "$status" --type "monitoring"
+pincho_notifai "$status" --type "monitoring"
 ```
 
 ### Batch Processing with NotifAI
 
 ```bash
 #!/bin/sh
-. ./wirepusher.sh
+. ./pincho.sh
 
 # Process alerts from file
 while read -r alert; do
-    if wirepusher_notifai "$alert" --type "alerts"; then
+    if pincho_notifai "$alert" --type "alerts"; then
         echo "Processed: $alert"
     else
         echo "Failed: $alert" >&2
@@ -323,7 +323,7 @@ done < alerts.txt
 
 ```bash
 #!/bin/sh
-. ./wirepusher.sh
+. ./pincho.sh
 
 send_notifai_with_retry() {
     local text="$1"
@@ -331,7 +331,7 @@ send_notifai_with_retry() {
     local attempt=1
 
     while [ $attempt -le $max_attempts ]; do
-        if wirepusher_notifai "$text"; then
+        if pincho_notifai "$text"; then
             return 0
         fi
 
@@ -361,22 +361,22 @@ send_notifai_with_retry() {
 
 ```bash
 #!/bin/sh
-. ./wirepusher.sh
+. ./pincho.sh
 
 # Default to development
 ENV="${ENVIRONMENT:-development}"
 
 case "$ENV" in
     production)
-        WIREPUSHER_TOKEN="$PROD_TOKEN"
+        PINCHO_TOKEN="$PROD_TOKEN"
         NOTIFICATION_TYPE="prod-alerts"
         ;;
     staging)
-        WIREPUSHER_TOKEN="$STAGING_TOKEN"
+        PINCHO_TOKEN="$STAGING_TOKEN"
         NOTIFICATION_TYPE="staging-alerts"
         ;;
     development)
-        WIREPUSHER_TOKEN="$DEV_TOKEN"
+        PINCHO_TOKEN="$DEV_TOKEN"
         NOTIFICATION_TYPE="dev-alerts"
         ;;
     *)
@@ -385,7 +385,7 @@ case "$ENV" in
         ;;
 esac
 
-wirepusher_send \
+pincho_send \
     --title "[$ENV] Alert" \
     --message "Deployment complete" \
     --type "$NOTIFICATION_TYPE"
@@ -395,10 +395,10 @@ wirepusher_send \
 
 **GCP Secret Manager:**
 ```bash
-WIREPUSHER_TOKEN=$(gcloud secrets versions access latest \
-    --secret="wirepusher-token" 2>/dev/null)
+PINCHO_TOKEN=$(gcloud secrets versions access latest \
+    --secret="pincho-token" 2>/dev/null)
 
-if [ -z "$WIREPUSHER_TOKEN" ]; then
+if [ -z "$PINCHO_TOKEN" ]; then
     echo "Failed to fetch token from Secret Manager" >&2
     exit 1
 fi
@@ -406,41 +406,41 @@ fi
 
 **AWS Secrets Manager:**
 ```bash
-WIREPUSHER_TOKEN=$(aws secretsmanager get-secret-value \
-    --secret-id wirepusher-token \
+PINCHO_TOKEN=$(aws secretsmanager get-secret-value \
+    --secret-id pincho-token \
     --query SecretString \
     --output text 2>/dev/null)
 ```
 
 **HashiCorp Vault:**
 ```bash
-WIREPUSHER_TOKEN=$(vault kv get -field=token secret/wirepusher 2>/dev/null)
+PINCHO_TOKEN=$(vault kv get -field=token secret/pincho 2>/dev/null)
 ```
 
 ## Integration Patterns
 
 ### Systemd Service with Timer
 
-Service file (`/etc/systemd/system/wirepusher-monitor.service`):
+Service file (`/etc/systemd/system/pincho-monitor.service`):
 ```ini
 [Unit]
-Description=WirePusher Monitoring Notifications
+Description=Pincho Monitoring Notifications
 After=network.target
 
 [Service]
 Type=oneshot
 User=monitoring
-Environment="WIREPUSHER_TOKEN=wpt_your_token"
+Environment="PINCHO_TOKEN=pnc_your_token"
 ExecStart=/usr/local/bin/send-monitoring-alert.sh
 
 [Install]
 WantedBy=multi-user.target
 ```
 
-Timer file (`/etc/systemd/system/wirepusher-monitor.timer`):
+Timer file (`/etc/systemd/system/pincho-monitor.timer`):
 ```ini
 [Unit]
-Description=Run WirePusher monitoring every hour
+Description=Run Pincho monitoring every hour
 
 [Timer]
 OnBootSec=5min
@@ -450,19 +450,19 @@ OnUnitActiveSec=1h
 WantedBy=timers.target
 ```
 
-Enable: `sudo systemctl enable --now wirepusher-monitor.timer`
+Enable: `sudo systemctl enable --now pincho-monitor.timer`
 
 ### Cron with Success/Failure Notifications
 
 ```bash
 #!/bin/sh
 # send-backup-status.sh
-. /usr/local/lib/wirepusher/wirepusher.sh
+. /usr/local/lib/pincho/pincho.sh
 
 if /path/to/backup.sh; then
-    wirepusher_send "Backup Success" "Hourly backup completed"
+    pincho_send "Backup Success" "Hourly backup completed"
 else
-    wirepusher_send "Backup Failed" "Check backup logs (exit code $?)"
+    pincho_send "Backup Failed" "Check backup logs (exit code $?)"
 fi
 ```
 
@@ -482,9 +482,9 @@ deploy:
   after_script:
     - |
       if [ $CI_JOB_STATUS = "success" ]; then
-        sh -c '. ./wirepusher.sh && wirepusher_send "Deploy Success" "Deployed $CI_COMMIT_REF_NAME"'
+        sh -c '. ./pincho.sh && pincho_send "Deploy Success" "Deployed $CI_COMMIT_REF_NAME"'
       else
-        sh -c '. ./wirepusher.sh && wirepusher_send "Deploy Failed" "Check logs: $CI_JOB_URL"'
+        sh -c '. ./pincho.sh && pincho_send "Deploy Failed" "Check logs: $CI_JOB_URL"'
       fi
 ```
 
@@ -507,13 +507,13 @@ jobs:
       - name: Send notification
         if: always()
         env:
-          WIREPUSHER_TOKEN: ${{ secrets.WIREPUSHER_TOKEN }}
+          PINCHO_TOKEN: ${{ secrets.PINCHO_TOKEN }}
         run: |
-          . ./wirepusher.sh
+          . ./pincho.sh
           if [ "${{ job.status }}" = "success" ]; then
-            wirepusher_send "Deploy Success" "Deployed to production"
+            pincho_send "Deploy Success" "Deployed to production"
           else
-            wirepusher_send "Deploy Failed" "Check workflow logs"
+            pincho_send "Deploy Failed" "Check workflow logs"
           fi
 ```
 
@@ -524,7 +524,7 @@ jobs:
 pipeline {
     agent any
     environment {
-        WIREPUSHER_TOKEN = credentials('wirepusher-token')
+        PINCHO_TOKEN = credentials('pincho-token')
     }
     stages {
         stage('Build') {
@@ -536,14 +536,14 @@ pipeline {
     post {
         success {
             sh '''
-                . ./wirepusher.sh
-                wirepusher_send "Build Success" "Build #${BUILD_NUMBER} completed"
+                . ./pincho.sh
+                pincho_send "Build Success" "Build #${BUILD_NUMBER} completed"
             '''
         }
         failure {
             sh '''
-                . ./wirepusher.sh
-                wirepusher_send "Build Failed" "Build #${BUILD_NUMBER} failed - check ${BUILD_URL}"
+                . ./pincho.sh
+                pincho_send "Build Failed" "Build #${BUILD_NUMBER} failed - check ${BUILD_URL}"
             '''
         }
     }
@@ -599,14 +599,14 @@ done < <(command)
 ```bash
 # Bad: Source script 100 times
 for i in $(seq 1 100); do
-    . ./wirepusher.sh  # Sourced 100 times!
-    wirepusher_send "Alert $i" "Message"
+    . ./pincho.sh  # Sourced 100 times!
+    pincho_send "Alert $i" "Message"
 done
 
 # Good: Source once
-. ./wirepusher.sh
+. ./pincho.sh
 for i in $(seq 1 100); do
-    wirepusher_send "Alert $i" "Message"
+    pincho_send "Alert $i" "Message"
 done
 ```
 
@@ -614,22 +614,22 @@ done
 ```bash
 # Sequential: ~10 seconds for 10 notifications
 for i in $(seq 1 10); do
-    wirepusher_send "Notification $i" "Message"
+    pincho_send "Notification $i" "Message"
 done
 
 # Parallel (4 at a time): ~2.5 seconds for 10 notifications
-seq 1 10 | xargs -P 4 -I {} sh -c '. ./wirepusher.sh && wirepusher_send "Notification {}" "Message"'
+seq 1 10 | xargs -P 4 -I {} sh -c '. ./pincho.sh && pincho_send "Notification {}" "Message"'
 ```
 
 **Memory efficiency:**
 ```bash
 # Bad: Load entire file into memory
 large_file_content=$(cat very-large-file.txt)
-wirepusher_send "File Content" "$large_file_content"
+pincho_send "File Content" "$large_file_content"
 
 # Good: Send summary or truncate
 summary=$(head -n 50 very-large-file.txt | tail -n 10)
-wirepusher_send "File Summary" "$summary"
+pincho_send "File Summary" "$summary"
 ```
 
 ### Security Best Practices
@@ -637,23 +637,23 @@ wirepusher_send "File Summary" "$summary"
 **Secure credential storage:**
 ```bash
 # Bad: Credentials in script
-WIREPUSHER_TOKEN="wpt_abc123..."
+PINCHO_TOKEN="pnc_abc123..."
 
 # Good: Environment variables
-export WIREPUSHER_TOKEN  # Set externally
+export PINCHO_TOKEN  # Set externally
 
 # Better: Secret managers
-WIREPUSHER_TOKEN=$(gcloud secrets versions access latest --secret="wirepusher-token")
+PINCHO_TOKEN=$(gcloud secrets versions access latest --secret="pincho-token")
 ```
 
 **Validate inputs:**
 ```bash
 #!/bin/sh
-. ./wirepusher.sh
+. ./pincho.sh
 
 # Validate required environment variables
-if [ -z "$WIREPUSHER_TOKEN" ]; then
-    echo "Error: WIREPUSHER_TOKEN not set" >&2
+if [ -z "$PINCHO_TOKEN" ]; then
+    echo "Error: PINCHO_TOKEN not set" >&2
     exit 1
 fi
 
@@ -661,7 +661,7 @@ fi
 title=$(echo "$1" | tr -d '\n\r' | cut -c1-256)
 message=$(echo "$2" | tr -d '\r' | cut -c1-4096)
 
-wirepusher_send "$title" "$message"
+pincho_send "$title" "$message"
 ```
 
 ## Debugging Techniques
@@ -678,16 +678,16 @@ debug_send() {
     echo "=== DEBUG: Sending notification ===" >&2
     echo "Title: $title" >&2
     echo "Message: $message" >&2
-    echo "Token: ${WIREPUSHER_TOKEN:0:8}..." >&2
+    echo "Token: ${PINCHO_TOKEN:0:8}..." >&2
 
-    wirepusher_send "$title" "$message"
+    pincho_send "$title" "$message"
     local exit_code=$?
 
     echo "Exit code: $exit_code" >&2
 
     # Show rate limit info if available
-    if [ -n "$WIREPUSHER_LAST_RATE_REMAINING" ]; then
-        echo "Rate remaining: $WIREPUSHER_LAST_RATE_REMAINING" >&2
+    if [ -n "$PINCHO_LAST_RATE_REMAINING" ]; then
+        echo "Rate remaining: $PINCHO_LAST_RATE_REMAINING" >&2
     fi
 
     return $exit_code
@@ -698,7 +698,7 @@ debug_send() {
 
 ```bash
 #!/bin/sh
-. ./wirepusher.sh
+. ./pincho.sh
 
 DRY_RUN="${DRY_RUN:-0}"
 
@@ -710,7 +710,7 @@ send_notification() {
         echo "[DRY RUN] Would send: title=\"$title\" message=\"$message\""
         return 0
     else
-        wirepusher_send "$title" "$message"
+        pincho_send "$title" "$message"
     fi
 }
 
@@ -722,9 +722,9 @@ send_notification() {
 ```bash
 #!/bin/sh
 set -x  # Enable command tracing
-. ./wirepusher.sh
+. ./pincho.sh
 
-wirepusher_send "Test" "Message"
+pincho_send "Test" "Message"
 
 set +x  # Disable command tracing
 ```
@@ -735,8 +735,8 @@ set +x  # Disable command tracing
 
 Check token:
 ```bash
-echo "Token: ${WIREPUSHER_TOKEN:0:8}..."
-echo "Length: ${#WIREPUSHER_TOKEN}"
+echo "Token: ${PINCHO_TOKEN:0:8}..."
+echo "Length: ${#PINCHO_TOKEN}"
 ```
 
 Verify in app: Settings → Help → copy token
@@ -759,30 +759,30 @@ apk add curl
 
 Test connectivity:
 ```bash
-curl -I https://wirepusher.com
+curl -I https://pincho.com
 ```
 
 Check DNS resolution:
 ```bash
-nslookup wirepusher.com
+nslookup pincho.com
 ```
 
 ### Rate limit debugging
 
 ```bash
 #!/bin/sh
-. ./wirepusher.sh
+. ./pincho.sh
 
-wirepusher_send "Test" "Message"
+pincho_send "Test" "Message"
 
-echo "Limit: $WIREPUSHER_LAST_RATE_LIMIT"
-echo "Remaining: $WIREPUSHER_LAST_RATE_REMAINING"
-echo "Reset: $WIREPUSHER_LAST_RATE_RESET"
+echo "Limit: $PINCHO_LAST_RATE_LIMIT"
+echo "Remaining: $PINCHO_LAST_RATE_REMAINING"
+echo "Reset: $PINCHO_LAST_RATE_RESET"
 
 # Convert reset timestamp to readable date
-if [ -n "$WIREPUSHER_LAST_RATE_RESET" ]; then
-    date -d "@$WIREPUSHER_LAST_RATE_RESET" 2>/dev/null || \
-    date -r "$WIREPUSHER_LAST_RATE_RESET" 2>/dev/null
+if [ -n "$PINCHO_LAST_RATE_RESET" ]; then
+    date -d "@$PINCHO_LAST_RATE_RESET" 2>/dev/null || \
+    date -r "$PINCHO_LAST_RATE_RESET" 2>/dev/null
 fi
 ```
 

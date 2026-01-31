@@ -11,7 +11,7 @@ We release patches for security vulnerabilities for the following versions:
 
 ## Reporting a Vulnerability
 
-The WirePusher team takes security bugs seriously. We appreciate your efforts to responsibly disclose your findings.
+The Pincho team takes security bugs seriously. We appreciate your efforts to responsibly disclose your findings.
 
 ### How to Report
 
@@ -20,7 +20,7 @@ The WirePusher team takes security bugs seriously. We appreciate your efforts to
 Instead, please report security vulnerabilities by:
 
 1. **Opening a confidential issue** on GitLab:
-   - Go to https://gitlab.com/wirepusher/wirepusher-sh/-/issues/new
+   - Go to https://gitlab.com/pincho/pincho-sh/-/issues/new
    - Check the "This issue is confidential" checkbox
    - Provide detailed information about the vulnerability
 
@@ -49,26 +49,26 @@ Instead, please report security vulnerabilities by:
 
 ## Security Best Practices for Users
 
-When using the WirePusher shell scripts:
+When using the Pincho shell scripts:
 
 ### 1. Protect Your API Tokens
 
 **Never hardcode tokens in scripts**:
 ```bash
 # Bad: Hardcoded token (anyone with file access can see it)
-wirepusher_send "Title" "Message" "abc12345"
+pincho_send "Title" "Message" "abc12345"
 
 # Good: Use environment variable
-export WIREPUSHER_TOKEN="abc12345"
-wirepusher_send "Title" "Message" "$WIREPUSHER_TOKEN"
+export PINCHO_TOKEN="abc12345"
+pincho_send "Title" "Message" "$PINCHO_TOKEN"
 
 # Better: Load from secure location
-WIREPUSHER_TOKEN=$(cat ~/.wirepusher/token)
-wirepusher_send "Title" "Message" "$WIREPUSHER_TOKEN"
+PINCHO_TOKEN=$(cat ~/.pincho/token)
+pincho_send "Title" "Message" "$PINCHO_TOKEN"
 
 # Best: Use secret manager (GCP example)
-WIREPUSHER_TOKEN=$(gcloud secrets versions access latest --secret="wirepusher-token")
-wirepusher_send "Title" "Message" "$WIREPUSHER_TOKEN"
+PINCHO_TOKEN=$(gcloud secrets versions access latest --secret="pincho-token")
+pincho_send "Title" "Message" "$PINCHO_TOKEN"
 ```
 
 ### 2. Protect Script Files
@@ -79,7 +79,7 @@ Set restrictive permissions on scripts containing tokens:
 chmod 700 my-notification-script.sh
 
 # For token files
-chmod 600 ~/.wirepusher/token
+chmod 600 ~/.pincho/token
 ```
 
 ### 3. Never Commit Tokens to Version Control
@@ -111,7 +111,7 @@ validate_message() {
 
 read -r message
 validate_message "$message"
-wirepusher_send "Alert" "$message" "$WIREPUSHER_TOKEN"
+pincho_send "Alert" "$message" "$PINCHO_TOKEN"
 ```
 
 ### 5. Use Secure curl
@@ -161,9 +161,9 @@ Log notification sends for security monitoring:
 send_with_logging() {
     local title="$1"
     local result
-    result=$(wirepusher_send "$title" "$2" "$3" 2>&1)
+    result=$(pincho_send "$title" "$2" "$3" 2>&1)
     local exit_code=$?
-    logger -t wirepusher "Sent: title=\"$title\" status=$exit_code"
+    logger -t pincho "Sent: title=\"$title\" status=$exit_code"
     return $exit_code
 }
 ```
@@ -178,28 +178,28 @@ When using cron, ensure:
 ```bash
 # crontab -e
 # Load token from secure location, not in crontab
-0 * * * * WIREPUSHER_TOKEN=$(cat ~/.wirepusher/token) /path/to/script.sh
+0 * * * * PINCHO_TOKEN=$(cat ~/.pincho/token) /path/to/script.sh
 ```
 
 ## Known Security Considerations
 
 ### Command Injection
 
-The library uses proper quoting and escaping for JSON values. **Do not** modify the internal `_wirepusher_escape_json()` function without careful review.
+The library uses proper quoting and escaping for JSON values. **Do not** modify the internal `_pincho_escape_json()` function without careful review.
 
 If you extend the scripts, always quote variables:
 ```bash
 # Good: Quoted variables
 title="$USER_INPUT"
-wirepusher_send "$title" "message" "$token"
+pincho_send "$title" "message" "$token"
 
 # Bad: Unquoted (vulnerable to injection)
-wirepusher_send $title message $token
+pincho_send $title message $token
 ```
 
 ### No Built-in Encryption
 
-Unlike other WirePusher SDKs, the shell scripts **do not** support message encryption. If you need encrypted notifications:
+Unlike other Pincho SDKs, the shell scripts **do not** support message encryption. If you need encrypted notifications:
 - Use a different SDK (Python, Go, JavaScript, etc.)
 - Or manually implement encryption before sending
 
@@ -208,14 +208,14 @@ Unlike other WirePusher SDKs, the shell scripts **do not** support message encry
 When passing tokens as arguments, they may be visible in process listings (`ps aux`):
 ```bash
 # Potentially visible in ps output
-wirepusher_send "Title" "Message" "abc12345"
+pincho_send "Title" "Message" "abc12345"
 ```
 
 **Mitigation**: Use environment variables instead:
 ```bash
 # Not visible in ps output
-export WIREPUSHER_TOKEN="abc12345"
-wirepusher_send "Title" "Message" "$WIREPUSHER_TOKEN"
+export PINCHO_TOKEN="abc12345"
+pincho_send "Title" "Message" "$PINCHO_TOKEN"
 ```
 
 ### Shell History
@@ -223,24 +223,24 @@ wirepusher_send "Title" "Message" "$WIREPUSHER_TOKEN"
 Tokens typed in shell may be stored in history files (`.bash_history`, `.zsh_history`):
 ```bash
 # Bad: Token visible in history
-export WIREPUSHER_TOKEN="abc12345"
+export PINCHO_TOKEN="abc12345"
 
 # Good: Prepend with space (in bash/zsh with HISTCONTROL=ignorespace)
- export WIREPUSHER_TOKEN="abc12345"
+ export PINCHO_TOKEN="abc12345"
 
 # Better: Don't type it at all - load from file
-export WIREPUSHER_TOKEN=$(cat ~/.wirepusher/token)
+export PINCHO_TOKEN=$(cat ~/.pincho/token)
 ```
 
 ### Network Security
 
 - The library communicates over HTTPS with TLS encryption
 - Ensure your system's CA certificates are up-to-date
-- Test connectivity: `curl -v https://api.wirepusher.dev`
+- Test connectivity: `curl -v https://api.pincho.dev`
 
 ### POSIX Compliance
 
-Both `wirepusher.sh` (POSIX sh) and `wirepusher-bash.sh` (Bash) are audited for security. Use the appropriate version for your shell.
+Both `pincho.sh` (POSIX sh) and `pincho-bash.sh` (Bash) are audited for security. Use the appropriate version for your shell.
 
 ## Security Updates
 
@@ -265,7 +265,7 @@ We recognize security researchers who responsibly disclose vulnerabilities:
 
 If you have questions about this security policy, please:
 - Open a public issue for general security questions
-- Contact us at **support@wirepusher.dev** for private inquiries
+- Contact us at **support@pincho.dev** for private inquiries
 
 ---
 

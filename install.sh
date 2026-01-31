@@ -1,14 +1,14 @@
 #!/bin/sh
 #
-# WirePusher Shell Scripts Installer
+# Pincho Shell Scripts Installer
 #
-# This script downloads and installs the WirePusher shell script library.
+# This script downloads and installs the Pincho shell script library.
 #
 # Usage:
-#   curl -sL https://gitlab.com/wirepusher/wirepusher-sh/-/raw/main/install.sh | sh
+#   curl -sL https://gitlab.com/pincho-app/pincho-sh/-/raw/main/install.sh | sh
 #
 # Or with custom install location:
-#   INSTALL_DIR=/opt/wirepusher sh install.sh
+#   INSTALL_DIR=/opt/pincho sh install.sh
 #
 
 set -e
@@ -29,16 +29,16 @@ else
 fi
 
 # Configuration
-REPO_URL="https://gitlab.com/wirepusher/wirepusher-sh/-/raw/main"
-DEFAULT_INSTALL_DIR="/usr/local/lib/wirepusher"
+REPO_URL="https://gitlab.com/pincho-app/pincho-sh/-/raw/main"
+DEFAULT_INSTALL_DIR="/usr/local/lib/pincho"
 INSTALL_DIR="${INSTALL_DIR:-$DEFAULT_INSTALL_DIR}"
 
 # Check if running with sudo when needed
 check_sudo() {
     if [ "$(id -u)" -ne 0 ] && [ "$INSTALL_DIR" = "$DEFAULT_INSTALL_DIR" ]; then
-        printf "${YELLOW}⚠️  Installing to %s requires sudo privileges${NC}\n" "$INSTALL_DIR"
+        printf "${YELLOW}Warning: Installing to %s requires sudo privileges${NC}\n" "$INSTALL_DIR"
         printf "${YELLOW}   Run with: sudo sh install.sh${NC}\n"
-        printf "${YELLOW}   Or install to home directory: INSTALL_DIR=~/.local/lib/wirepusher sh install.sh${NC}\n\n"
+        printf "${YELLOW}   Or install to home directory: INSTALL_DIR=~/.local/lib/pincho sh install.sh${NC}\n\n"
         exit 1
     fi
 }
@@ -48,16 +48,16 @@ check_dependencies() {
     printf "${BLUE}Checking dependencies...${NC}\n"
 
     if ! command -v curl >/dev/null 2>&1; then
-        printf "${RED}✗ curl is not installed${NC}\n"
+        printf "${RED}Error: curl is not installed${NC}\n"
         printf "  Please install curl and try again\n"
         exit 1
     fi
-    printf "${GREEN}✓ curl is installed${NC}\n"
+    printf "${GREEN}OK: curl is installed${NC}\n"
 
     # Check for bash (optional)
     if command -v bash >/dev/null 2>&1; then
         bash_version=$(bash --version | head -1 | grep -oE '[0-9]+\.[0-9]+' | head -1)
-        printf "${GREEN}✓ bash ${bash_version} is installed${NC}\n"
+        printf "${GREEN}OK: bash ${bash_version} is installed${NC}\n"
     fi
 }
 
@@ -69,9 +69,9 @@ create_install_dir() {
         printf "${YELLOW}Directory already exists: %s${NC}\n" "$INSTALL_DIR"
     else
         if mkdir -p "$INSTALL_DIR"; then
-            printf "${GREEN}✓ Created directory: %s${NC}\n" "$INSTALL_DIR"
+            printf "${GREEN}OK: Created directory: %s${NC}\n" "$INSTALL_DIR"
         else
-            printf "${RED}✗ Failed to create directory: %s${NC}\n" "$INSTALL_DIR"
+            printf "${RED}Error: Failed to create directory: %s${NC}\n" "$INSTALL_DIR"
             exit 1
         fi
     fi
@@ -86,10 +86,10 @@ download_file() {
     printf "  Downloading %s..." "$name"
 
     if curl -fsSL -o "$dest" "$url"; then
-        printf " ${GREEN}✓${NC}\n"
+        printf " ${GREEN}OK${NC}\n"
         return 0
     else
-        printf " ${RED}✗${NC}\n"
+        printf " ${RED}FAILED${NC}\n"
         return 1
     fi
 }
@@ -99,47 +99,47 @@ install_files() {
     printf "\n${BLUE}Installing library files...${NC}\n"
 
     # Download POSIX sh version
-    if ! download_file "$REPO_URL/wirepusher.sh" "$INSTALL_DIR/wirepusher.sh" "wirepusher.sh"; then
-        printf "${RED}Failed to download wirepusher.sh${NC}\n"
+    if ! download_file "$REPO_URL/pincho.sh" "$INSTALL_DIR/pincho.sh" "pincho.sh"; then
+        printf "${RED}Failed to download pincho.sh${NC}\n"
         exit 1
     fi
 
     # Download Bash version
-    if ! download_file "$REPO_URL/wirepusher-bash.sh" "$INSTALL_DIR/wirepusher-bash.sh" "wirepusher-bash.sh"; then
-        printf "${YELLOW}Warning: Failed to download wirepusher-bash.sh${NC}\n"
+    if ! download_file "$REPO_URL/pincho-bash.sh" "$INSTALL_DIR/pincho-bash.sh" "pincho-bash.sh"; then
+        printf "${YELLOW}Warning: Failed to download pincho-bash.sh${NC}\n"
     fi
 
     # Make files executable
-    chmod +x "$INSTALL_DIR/wirepusher.sh" 2>/dev/null || true
-    chmod +x "$INSTALL_DIR/wirepusher-bash.sh" 2>/dev/null || true
+    chmod +x "$INSTALL_DIR/pincho.sh" 2>/dev/null || true
+    chmod +x "$INSTALL_DIR/pincho-bash.sh" 2>/dev/null || true
 
-    printf "${GREEN}✓ Installation complete!${NC}\n"
+    printf "${GREEN}OK: Installation complete!${NC}\n"
 }
 
 # Print usage instructions
 print_instructions() {
-    printf "\n${GREEN}═══════════════════════════════════════════════════════${NC}\n"
-    printf "${GREEN}  WirePusher Shell Scripts installed successfully!${NC}\n"
-    printf "${GREEN}═══════════════════════════════════════════════════════${NC}\n\n"
+    printf "\n${GREEN}=======================================================${NC}\n"
+    printf "${GREEN}  Pincho Shell Scripts installed successfully!${NC}\n"
+    printf "${GREEN}=======================================================${NC}\n\n"
 
     printf "${BLUE}Installation directory:${NC} %s\n\n" "$INSTALL_DIR"
 
     printf "${BLUE}Usage:${NC}\n"
     printf "  1. Source the library in your scripts:\n"
-    printf "     ${YELLOW}. %s/wirepusher.sh${NC}\n\n" "$INSTALL_DIR"
+    printf "     ${YELLOW}. %s/pincho.sh${NC}\n\n" "$INSTALL_DIR"
 
     printf "  2. Set environment variables:\n"
-    printf "     ${YELLOW}export WIREPUSHER_TOKEN='wpt_your_token'${NC}\n\n"
+    printf "     ${YELLOW}export PINCHO_TOKEN='your_token'${NC}\n\n"
 
     printf "  3. Send notifications:\n"
-    printf "     ${YELLOW}wirepusher_send 'Title' 'Message'${NC}\n\n"
+    printf "     ${YELLOW}pincho_send 'Title' 'Message'${NC}\n\n"
 
     printf "${BLUE}Examples:${NC}\n"
     printf "  View examples at:\n"
-    printf "  https://gitlab.com/wirepusher/wirepusher-sh/-/tree/main/examples\n\n"
+    printf "  https://gitlab.com/pincho-app/pincho-sh/-/tree/main/examples\n\n"
 
     printf "${BLUE}Documentation:${NC}\n"
-    printf "  https://gitlab.com/wirepusher/wirepusher-sh\n\n"
+    printf "  https://gitlab.com/pincho-app/pincho-sh\n\n"
 
     # Suggest adding to shell profile
     if [ "$INSTALL_DIR" != "$DEFAULT_INSTALL_DIR" ]; then
@@ -150,9 +150,9 @@ print_instructions() {
 
 # Main installation
 main() {
-    printf "${BLUE}═══════════════════════════════════════════════════════${NC}\n"
-    printf "${BLUE}  WirePusher Shell Scripts Installer${NC}\n"
-    printf "${BLUE}═══════════════════════════════════════════════════════${NC}\n\n"
+    printf "${BLUE}=======================================================${NC}\n"
+    printf "${BLUE}  Pincho Shell Scripts Installer${NC}\n"
+    printf "${BLUE}=======================================================${NC}\n\n"
 
     check_sudo
     check_dependencies

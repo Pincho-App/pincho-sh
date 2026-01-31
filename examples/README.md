@@ -1,17 +1,17 @@
-# WirePusher Shell Scripts - Examples
+# Pincho Shell Scripts - Examples
 
-Practical examples for the WirePusher shell scripts.
+Practical examples for the Pincho shell scripts.
 
 ## Prerequisites
 
 - **curl** - Install via `brew install curl`, `apt install curl`, or `yum install curl`
-- **API Token** - Get from [wirepusher.dev](https://wirepusher.dev), set as `export WIREPUSHER_TOKEN="your-token"`
+- **API Token** - Get from [pincho.dev](https://pincho.dev), set as `export PINCHO_TOKEN="your-token"`
 - **Shell** - Any POSIX shell (sh, bash, zsh, etc.)
 
 ## Quick Start
 
 ```bash
-export WIREPUSHER_TOKEN="wpt_your_token"
+export PINCHO_TOKEN="pnc_your_token"
 cd examples
 ./simple.sh
 ```
@@ -24,8 +24,8 @@ Demonstrates positional and named arguments:
 ```bash
 ./simple.sh
 
-# Positional: wirepusher_send "Title" "Message"
-# Named: wirepusher_send --title "Title" --message "Message" --type "type"
+# Positional: pincho_send "Title" "Message"
+# Named: pincho_send --title "Title" --message "Message" --type "type"
 ```
 
 ### cron-job.sh - Periodic Monitoring
@@ -35,7 +35,7 @@ Monitors disk (>80%), memory (>90%), and system load:
 ./cron-job.sh
 
 # Add to crontab:
-# */15 * * * * WIREPUSHER_TOKEN="token" /path/to/cron-job.sh
+# */15 * * * * PINCHO_TOKEN="token" /path/to/cron-job.sh
 ```
 
 ### monitoring.sh - System Health Checks
@@ -123,8 +123,8 @@ Convert free-form text to structured notifications:
 ./notifai.sh
 
 # Examples:
-# wirepusher_notifai "Deploy server and restart services"
-# wirepusher_notifai --text "SSL cert expires in 7 days" --type "security"
+# pincho_notifai "Deploy server and restart services"
+# pincho_notifai --text "SSL cert expires in 7 days" --type "security"
 ```
 
 Demonstrates: NotifAI endpoint, AI conversion, multiple text formats
@@ -133,19 +133,19 @@ Demonstrates: NotifAI endpoint, AI conversion, multiple text formats
 
 **Token configuration:**
 ```bash
-export WIREPUSHER_TOKEN="wpt_abc12345"    # Before running
-WIREPUSHER_TOKEN="wpt_abc" ./simple.sh    # Inline
-export WIREPUSHER_TOKEN=$(cat ~/.token)   # From file
+export PINCHO_TOKEN="pnc_abc12345"    # Before running
+PINCHO_TOKEN="pnc_abc" ./simple.sh    # Inline
+export PINCHO_TOKEN=$(cat ~/.token)   # From file
 ```
 
 **Batch operations:**
 ```bash
 for server in web1 web2 web3; do
-    wirepusher_send "Server $server" "Status OK"
+    pincho_send "Server $server" "Status OK"
 done
 
 while read -r line; do
-    wirepusher_send "Alert" "$line"
+    pincho_send "Alert" "$line"
 done < notifications.txt
 ```
 
@@ -153,13 +153,13 @@ done < notifications.txt
 ```bash
 usage=$(df -h / | awk 'NR==2 {print $5}' | tr -d '%')
 if [ "$usage" -gt 80 ]; then
-    wirepusher_send "Disk Alert" "Disk usage: ${usage}%"
+    pincho_send "Disk Alert" "Disk usage: ${usage}%"
 fi
 ```
 
 **With options:**
 ```bash
-wirepusher_send \
+pincho_send \
     --title "Deploy Complete" \
     --message "v1.2.3" \
     --type "deployment" \
@@ -175,13 +175,13 @@ wirepusher_send \
 | `curl: command not found` | Install: `brew install curl`, `apt install curl`, `yum install curl` |
 | Exit code 4 / Failed to send | Check token validity and network connectivity |
 | `Permission denied` | Run `chmod +x script-name.sh` |
-| `No such file or directory: wirepusher.sh` | Source from correct path: `. ../wirepusher.sh` |
+| `No such file or directory: pincho.sh` | Source from correct path: `. ../pincho.sh` |
 | Messages not appearing | Verify token, ensure app is signed in, enable notifications |
 
 **Debug API connectivity:**
 ```bash
-curl -v https://wirepusher.com
-echo "Token: ${WIREPUSHER_TOKEN:0:8}..."
+curl -v https://pincho.com
+echo "Token: ${PINCHO_TOKEN:0:8}..."
 ```
 
 ## Documentation

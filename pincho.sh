@@ -1,23 +1,23 @@
 #!/bin/sh
 #
-# WirePusher Shell Script Library (POSIX sh compatible)
-# Official shell script library for WirePusher - https://wirepusher.dev
+# Pincho Shell Script Library (POSIX sh compatible)
+# Official shell script library for Pincho - https://pincho.app
 #
 # Usage:
-#   source wirepusher.sh
-#   wirepusher_send "Title" "Message"
+#   source pincho.sh
+#   pincho_send "Title" "Message"
 #
 # Or with options:
-#   wirepusher_send --title "Title" --message "Message" --type info
+#   pincho_send --title "Title" --message "Message" --type info
 #
 # Environment variables:
-#   WIREPUSHER_TOKEN - Your API token (required if not passed as argument)
-#   WIREPUSHER_URL   - API URL (default: https://wirepusher.com/send)
+#   PINCHO_TOKEN - Your API token (required if not passed as argument)
+#   PINCHO_URL   - API URL (default: https://api.pincho.app/send)
 #
 # Rate limit variables (exported after each API call):
-#   WIREPUSHER_LAST_RATE_LIMIT     - Total requests allowed per hour
-#   WIREPUSHER_LAST_RATE_REMAINING - Requests remaining in current window
-#   WIREPUSHER_LAST_RATE_RESET     - Unix timestamp when rate limit resets
+#   PINCHO_LAST_RATE_LIMIT     - Total requests allowed per hour
+#   PINCHO_LAST_RATE_REMAINING - Requests remaining in current window
+#   PINCHO_LAST_RATE_RESET     - Unix timestamp when rate limit resets
 #
 # Exit codes:
 #   0 - Success
@@ -28,11 +28,11 @@
 #
 
 # Default API URL
-WIREPUSHER_URL="${WIREPUSHER_URL:-https://wirepusher.com/send}"
+PINCHO_URL="${PINCHO_URL:-https://api.pincho.app/send}"
 
 # Escape JSON string
 # Escapes quotes, backslashes, newlines, tabs, and control characters
-_wirepusher_escape_json() {
+_pincho_escape_json() {
     printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g; s/	/\\t/g' | awk '{
         gsub(/\n/, "\\n");
         gsub(/\r/, "\\r");
@@ -42,7 +42,7 @@ _wirepusher_escape_json() {
 
 # Parse rate limit headers from curl response
 # Exports environment variables with rate limit information
-_wirepusher_parse_rate_limit_headers() {
+_pincho_parse_rate_limit_headers() {
     local headers_file="$1"
 
     if [ ! -f "$headers_file" ]; then
@@ -56,26 +56,26 @@ _wirepusher_parse_rate_limit_headers() {
 
     # Export to environment variables if found
     if [ -n "$limit" ]; then
-        WIREPUSHER_LAST_RATE_LIMIT="$limit"
-        export WIREPUSHER_LAST_RATE_LIMIT
+        PINCHO_LAST_RATE_LIMIT="$limit"
+        export PINCHO_LAST_RATE_LIMIT
     fi
 
     if [ -n "$remaining" ]; then
-        WIREPUSHER_LAST_RATE_REMAINING="$remaining"
-        export WIREPUSHER_LAST_RATE_REMAINING
+        PINCHO_LAST_RATE_REMAINING="$remaining"
+        export PINCHO_LAST_RATE_REMAINING
     fi
 
     if [ -n "$reset" ]; then
-        WIREPUSHER_LAST_RATE_RESET="$reset"
-        export WIREPUSHER_LAST_RATE_RESET
+        PINCHO_LAST_RATE_RESET="$reset"
+        export PINCHO_LAST_RATE_RESET
     fi
 }
 
-# Send a notification to WirePusher
+# Send a notification to Pincho
 #
 # Usage:
-#   wirepusher_send "Title" "Message"
-#   wirepusher_send --title "Title" --message "Message" --type info --tag prod
+#   pincho_send "Title" "Message"
+#   pincho_send --title "Title" --message "Message" --type info --tag prod
 #
 # Arguments:
 #   Positional: title message
@@ -86,18 +86,18 @@ _wirepusher_parse_rate_limit_headers() {
 #     --tag TEXT        - Add a tag (can be repeated, max 10 tags)
 #     --image URL       - Image URL to display
 #     --action URL      - Action URL to open when tapped
-#     --token TEXT      - API token (overrides WIREPUSHER_TOKEN)
+#     --token TEXT      - API token (overrides PINCHO_TOKEN)
 #
 # Returns:
 #   0 on success, non-zero on error
-wirepusher_send() {
+pincho_send() {
     local title=""
     local message=""
     local notification_type=""
     local tags=""
     local image_url=""
     local action_url=""
-    local token="${WIREPUSHER_TOKEN}"
+    local token="${PINCHO_TOKEN}"
 
     # Parse arguments
     if [ $# -eq 2 ] && [ "${1#--}" = "$1" ]; then
@@ -142,7 +142,7 @@ wirepusher_send() {
                     ;;
                 *)
                     echo "Error: Unknown argument '$1'" >&2
-                    echo "Usage: wirepusher_send [--title TITLE] [--message MESSAGE] [options]" >&2
+                    echo "Usage: pincho_send [--title TITLE] [--message MESSAGE] [options]" >&2
                     return 4
                     ;;
             esac
@@ -161,7 +161,7 @@ wirepusher_send() {
     fi
 
     if [ -z "$token" ]; then
-        echo "Error: WIREPUSHER_TOKEN environment variable or --token argument is required" >&2
+        echo "Error: PINCHO_TOKEN environment variable or --token argument is required" >&2
         return 2
     fi
 
@@ -180,11 +180,11 @@ wirepusher_send() {
 
     # Build JSON payload
     local json_data
-    json_data='{"title":"'"$(_wirepusher_escape_json "$title")"'","message":"'"$(_wirepusher_escape_json "$message")"'"'
+    json_data='{"title":"'"$(_pincho_escape_json "$title")"'","message":"'"$(_pincho_escape_json "$message")"'"'
 
     # Add optional fields
     if [ -n "$notification_type" ]; then
-        json_data="${json_data},\"type\":\"$(_wirepusher_escape_json "$notification_type")\""
+        json_data="${json_data},\"type\":\"$(_pincho_escape_json "$notification_type")\""
     fi
 
     if [ -n "$tags" ]; then
@@ -194,10 +194,10 @@ wirepusher_send() {
         IFS='|'
         for tag in $tags; do
             if [ $first -eq 1 ]; then
-                tags_json="${tags_json}\"$(_wirepusher_escape_json "$tag")\""
+                tags_json="${tags_json}\"$(_pincho_escape_json "$tag")\""
                 first=0
             else
-                tags_json="${tags_json},\"$(_wirepusher_escape_json "$tag")\""
+                tags_json="${tags_json},\"$(_pincho_escape_json "$tag")\""
             fi
         done
         unset IFS
@@ -206,11 +206,11 @@ wirepusher_send() {
     fi
 
     if [ -n "$image_url" ]; then
-        json_data="${json_data},\"image_url\":\"$(_wirepusher_escape_json "$image_url")\""
+        json_data="${json_data},\"image_url\":\"$(_pincho_escape_json "$image_url")\""
     fi
 
     if [ -n "$action_url" ]; then
-        json_data="${json_data},\"action_url\":\"$(_wirepusher_escape_json "$action_url")\""
+        json_data="${json_data},\"action_url\":\"$(_pincho_escape_json "$action_url")\""
     fi
 
     json_data="${json_data}}"
@@ -228,12 +228,13 @@ wirepusher_send() {
     # Make the request
     http_code=$(curl -fsSL -X POST \
         -H "Content-Type: application/json" \
+        -H "Authorization: Bearer ${token}" \
         -d "$json_data" \
         -w "%{http_code}" \
         -o "$temp_file" \
         -D "$headers_file" \
         --max-time 30 \
-        "${WIREPUSHER_URL}?type=wirepusher&token=${token}" 2>/dev/null)
+        "${PINCHO_URL}" 2>/dev/null)
 
     local curl_exit=$?
 
@@ -245,7 +246,7 @@ wirepusher_send() {
 
     # Parse and export rate limit headers
     if [ -f "$headers_file" ]; then
-        _wirepusher_parse_rate_limit_headers "$headers_file"
+        _pincho_parse_rate_limit_headers "$headers_file"
         rm -f "$headers_file"
     fi
 
@@ -292,22 +293,22 @@ wirepusher_send() {
 # Convert text to a notification using AI
 #
 # Usage:
-#   wirepusher_notifai "Deploy server and restart services"
-#   wirepusher_notifai --text "Check logs" --type "monitoring"
+#   pincho_notifai "Deploy server and restart services"
+#   pincho_notifai --text "Check logs" --type "monitoring"
 #
 # Arguments:
 #   Positional: text
 #   Named:
 #     --text TEXT       - Text to convert (required, 5-2500 chars)
 #     --type TEXT       - Notification type for categorization
-#     --token TEXT      - API token (overrides WIREPUSHER_TOKEN)
+#     --token TEXT      - API token (overrides PINCHO_TOKEN)
 #
 # Returns:
 #   0 on success, non-zero on error
-wirepusher_notifai() {
+pincho_notifai() {
     local text=""
     local notification_type=""
-    local token="${WIREPUSHER_TOKEN}"
+    local token="${PINCHO_TOKEN}"
 
     # Parse arguments
     if [ $# -eq 1 ] && [ "${1#--}" = "$1" ]; then
@@ -331,7 +332,7 @@ wirepusher_notifai() {
                     ;;
                 *)
                     echo "Error: Unknown argument '$1'" >&2
-                    echo "Usage: wirepusher_notifai [--text TEXT] [options]" >&2
+                    echo "Usage: pincho_notifai [--text TEXT] [options]" >&2
                     return 4
                     ;;
             esac
@@ -345,7 +346,7 @@ wirepusher_notifai() {
     fi
 
     if [ -z "$token" ]; then
-        echo "Error: WIREPUSHER_TOKEN environment variable or --token argument is required" >&2
+        echo "Error: PINCHO_TOKEN environment variable or --token argument is required" >&2
         return 2
     fi
 
@@ -362,11 +363,11 @@ wirepusher_notifai() {
 
     # Build JSON payload
     local json_data
-    json_data='{"text":"'"$(_wirepusher_escape_json "$text")"'"'
+    json_data='{"text":"'"$(_pincho_escape_json "$text")"'"'
 
     # Add optional type field
     if [ -n "$notification_type" ]; then
-        json_data="${json_data},\"type\":\"$(_wirepusher_escape_json "$notification_type")\""
+        json_data="${json_data},\"type\":\"$(_pincho_escape_json "$notification_type")\""
     fi
 
     json_data="${json_data}}"
@@ -382,18 +383,19 @@ wirepusher_notifai() {
     headers_file=$(mktemp)
 
     # Determine the base URL (remove /send if present, add /notifai)
-    local base_url="${WIREPUSHER_URL%/send}"
+    local base_url="${PINCHO_URL%/send}"
     local notifai_url="${base_url}/notifai"
 
     # Make the request
     http_code=$(curl -fsSL -X POST \
         -H "Content-Type: application/json" \
+        -H "Authorization: Bearer ${token}" \
         -d "$json_data" \
         -w "%{http_code}" \
         -o "$temp_file" \
         -D "$headers_file" \
         --max-time 30 \
-        "${notifai_url}?type=wirepusher&token=${token}" 2>/dev/null)
+        "${notifai_url}" 2>/dev/null)
 
     local curl_exit=$?
 
@@ -405,7 +407,7 @@ wirepusher_notifai() {
 
     # Parse and export rate limit headers
     if [ -f "$headers_file" ]; then
-        _wirepusher_parse_rate_limit_headers "$headers_file"
+        _pincho_parse_rate_limit_headers "$headers_file"
         rm -f "$headers_file"
     fi
 
@@ -450,12 +452,12 @@ wirepusher_notifai() {
 }
 
 # Print library version
-wirepusher_version() {
-    echo "WirePusher Shell Script Library v1.0.0"
+pincho_version() {
+    echo "Pincho Shell Script Library v1.0.0-alpha.1"
 }
 
 # Check if required commands are available
-wirepusher_check_dependencies() {
+pincho_check_dependencies() {
     if ! command -v curl >/dev/null 2>&1; then
         echo "Error: curl is required but not installed" >&2
         return 1
@@ -464,6 +466,6 @@ wirepusher_check_dependencies() {
 }
 
 # Run dependency check when sourced
-if ! wirepusher_check_dependencies; then
+if ! pincho_check_dependencies; then
     return 1 2>/dev/null || exit 1
 fi

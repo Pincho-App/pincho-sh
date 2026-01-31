@@ -1,6 +1,6 @@
-# Contributing to WirePusher Shell Scripts
+# Contributing to Pincho Shell Scripts
 
-Thank you for your interest in contributing to the WirePusher shell scripts! This document outlines the process and requirements for contributing to this project.
+Thank you for your interest in contributing to the Pincho shell scripts! This document outlines the process and requirements for contributing to this project.
 
 ## Pull Request / Merge Request Requirements
 
@@ -53,7 +53,7 @@ When making code changes, ALWAYS check if these documentation files need updatin
 
 ### POSIX Compliance
 
-The main `wirepusher.sh` script must remain POSIX sh-compliant for maximum portability:
+The main `pincho.sh` script must remain POSIX sh-compliant for maximum portability:
 
 - **DO NOT** use bash-specific features (`[[`, `$()`, arrays, etc.)
 - Use `sh` shebang: `#!/bin/sh`
@@ -61,7 +61,7 @@ The main `wirepusher.sh` script must remain POSIX sh-compliant for maximum porta
 
 ### Bash Version
 
-The `wirepusher-bash.sh` script can use bash-specific features but must:
+The `pincho-bash.sh` script can use bash-specific features but must:
 
 - Use `#!/usr/bin/env bash` shebang
 - Work with bash 3.2+ (macOS default)
@@ -176,10 +176,10 @@ glab issue create --title "Issue title" --description "$(cat <<'EOF'
 ## Environment Details
 - OS: [e.g., macOS 14.0, Ubuntu 22.04, Alpine Linux]
 - Shell: [e.g., bash 5.2, sh (dash), busybox ash]
-- Script Version: [e.g., wirepusher.sh v1.0.0]
+- Script Version: [e.g., pincho.sh v1.0.0]
 
 ## Reproduction Steps
-1. Run command: `./wirepusher.sh ...`
+1. Run command: `./pincho.sh ...`
 2. Observe: [what happens]
 3. Expected: [what should happen]
 
@@ -258,4 +258,4 @@ If you have questions about contributing, please:
 - Check existing issues and merge requests for examples
 - Reach out to the maintainers
 
-Thank you for contributing to WirePusher Shell Scripts!
+Thank you for contributing to Pincho Shell Scripts!

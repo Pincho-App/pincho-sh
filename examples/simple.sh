@@ -1,8 +1,8 @@
 #!/bin/sh
 #
-# Simple WirePusher notification example
+# Simple Pincho notification example
 #
-# This example demonstrates basic usage of the WirePusher library
+# This example demonstrates basic usage of the Pincho library
 # with environment variables for configuration.
 #
 
@@ -10,20 +10,20 @@
 set -e
 
 # Source the library
-. ../wirepusher.sh
+. ../pincho.sh
 
 # Check if credentials are set
-if [ -z "$WIREPUSHER_TOKEN" ]; then
-    echo "Error: Please set WIREPUSHER_TOKEN environment variable" >&2
+if [ -z "$PINCHO_TOKEN" ]; then
+    echo "Error: Please set PINCHO_TOKEN environment variable" >&2
     echo "" >&2
     echo "Example:" >&2
-    echo "  export WIREPUSHER_TOKEN='wpt_your_token'" >&2
+    echo "  export PINCHO_TOKEN='pnc_your_token'" >&2
     exit 1
 fi
 
 # Send a simple notification with positional arguments
 echo "Sending simple notification..."
-if wirepusher_send "Hello from Shell!" "This is a test notification"; then
+if pincho_send "Hello from Shell!" "This is a test notification"; then
     echo "✓ Notification sent successfully!"
 else
     echo "✗ Failed to send notification"
@@ -33,7 +33,7 @@ fi
 # Send a notification with named arguments
 echo ""
 echo "Sending notification with options..."
-if wirepusher_send \
+if pincho_send \
     --title "Deploy Complete" \
     --message "Application v1.2.3 has been deployed to production" \
     --type "deployment" \

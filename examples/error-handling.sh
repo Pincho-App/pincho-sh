@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# WirePusher Error Handling Example
+# Pincho Error Handling Example
 #
 # This example demonstrates:
 # - Comprehensive error handling patterns
@@ -17,30 +17,30 @@
 #   4 - Network or other error
 #
 # Environment variables:
-#   WIREPUSHER_TOKEN - Your API token (required)
+#   PINCHO_TOKEN - Your API token (required)
 #
 
 set -e  # Exit on error
 
-# Source the WirePusher library
+# Source the Pincho library
 # shellcheck disable=SC1091
-. "$(dirname "$0")/../wirepusher.sh"
+. "$(dirname "$0")/../pincho.sh"
 
 # Check for required environment variables
-if [ -z "$WIREPUSHER_TOKEN" ]; then
-    echo "Error: WIREPUSHER_TOKEN environment variable is required" >&2
-    echo "Usage: WIREPUSHER_TOKEN=your-token ./error-handling.sh" >&2
+if [ -z "$PINCHO_TOKEN" ]; then
+    echo "Error: PINCHO_TOKEN environment variable is required" >&2
+    echo "Usage: PINCHO_TOKEN=your-token ./error-handling.sh" >&2
     exit 1
 fi
 
-echo "=== WirePusher Error Handling Examples ==="
+echo "=== Pincho Error Handling Examples ==="
 echo ""
 
 # Example 1: Simple error handling with exit code check
 echo "1. Simple error handling (exit code check)..."
 echo ""
 
-if wirepusher_send \
+if pincho_send \
     --title "Error Handling Test" \
     --message "Testing basic error handling" \
     --type "test"; then
@@ -51,7 +51,7 @@ else
 
     case $exit_code in
         1)
-            echo "  → Authentication error: Check your WIREPUSHER_TOKEN" >&2
+            echo "  → Authentication error: Check your PINCHO_TOKEN" >&2
             ;;
         2)
             echo "  → Validation error: Check your parameters" >&2
@@ -88,7 +88,7 @@ send_with_retry() {
     while [ $attempt -le $max_attempts ]; do
         echo "  Attempt $attempt of $max_attempts..."
 
-        if wirepusher_send --title "$title" --message "$message"; then
+        if pincho_send --title "$title" --message "$message"; then
             echo "  ✓ Success on attempt $attempt"
             return 0
         fi
@@ -130,7 +130,7 @@ send_with_recovery() {
     local max_retries=3
 
     # Attempt to send
-    if wirepusher_send --title "$title" --message "$message"; then
+    if pincho_send --title "$title" --message "$message"; then
         return 0
     fi
 
@@ -142,7 +142,7 @@ send_with_recovery() {
         1)
             # Authentication error - check token and fail fast
             echo "  ✗ Authentication error: Invalid or expired token" >&2
-            echo "  → Please verify WIREPUSHER_TOKEN is correct" >&2
+            echo "  → Please verify PINCHO_TOKEN is correct" >&2
             return 1
             ;;
 
@@ -153,7 +153,7 @@ send_with_recovery() {
             # Retry with truncated/simplified message
             simple_message=$(printf '%s' "$message" | head -c 100)
 
-            if wirepusher_send --title "$title" --message "$simple_message"; then
+            if pincho_send --title "$title" --message "$simple_message"; then
                 echo "  ✓ Success with simplified message"
                 return 0
             else
@@ -166,15 +166,15 @@ send_with_recovery() {
             # Rate limit error - wait and retry
             echo "  ⚠ Rate limit exceeded: Waiting for reset..."
 
-            if [ -n "$WIREPUSHER_LAST_RATE_RESET" ]; then
+            if [ -n "$PINCHO_LAST_RATE_RESET" ]; then
                 current_time=$(date +%s)
-                wait_time=$((WIREPUSHER_LAST_RATE_RESET - current_time + 5))
+                wait_time=$((PINCHO_LAST_RATE_RESET - current_time + 5))
 
                 if [ $wait_time -gt 0 ] && [ $wait_time -le 3600 ]; then
                     echo "  ⏳ Waiting $wait_time seconds for rate limit reset..."
                     sleep "$wait_time"
 
-                    if wirepusher_send --title "$title" --message "$message"; then
+                    if pincho_send --title "$title" --message "$message"; then
                         echo "  ✓ Success after rate limit reset"
                         return 0
                     fi
@@ -184,7 +184,7 @@ send_with_recovery() {
                 echo "  ⏳ Waiting 60 seconds (reset time unknown)..."
                 sleep 60
 
-                if wirepusher_send --title "$title" --message "$message"; then
+                if pincho_send --title "$title" --message "$message"; then
                     echo "  ✓ Success after wait"
                     return 0
                 fi
@@ -205,7 +205,7 @@ send_with_recovery() {
                 echo "  ⏳ Retry $retry_count/$max_retries after ${delay}s delay..."
                 sleep $delay
 
-                if wirepusher_send --title "$title" --message "$message"; then
+                if pincho_send --title "$title" --message "$message"; then
                     echo "  ✓ Success on retry $retry_count"
                     return 0
                 fi
@@ -241,13 +241,13 @@ echo ""
 send_with_logging() {
     local title="$1"
     local message="$2"
-    local log_file="${3:-/tmp/wirepusher.log}"
+    local log_file="${3:-/tmp/pincho.log}"
 
     # Log the attempt
     echo "$(date '+%Y-%m-%d %H:%M:%S') - Sending notification: title='$title'" >> "$log_file"
 
     # Capture output
-    output=$(wirepusher_send --title "$title" --message "$message" 2>&1)
+    output=$(pincho_send --title "$title" --message "$message" 2>&1)
     exit_code=$?
 
     # Log the result
@@ -260,8 +260,8 @@ send_with_logging() {
         echo "  ✗ Failed (exit code $exit_code, logged to $log_file)" >&2
 
         # Also log rate limit information if available
-        if [ -n "$WIREPUSHER_LAST_RATE_REMAINING" ]; then
-            echo "$(date '+%Y-%m-%d %H:%M:%S') - Rate limit: $WIREPUSHER_LAST_RATE_REMAINING remaining" >> "$log_file"
+        if [ -n "$PINCHO_LAST_RATE_REMAINING" ]; then
+            echo "$(date '+%Y-%m-%d %H:%M:%S') - Rate limit: $PINCHO_LAST_RATE_REMAINING remaining" >> "$log_file"
         fi
 
         return $exit_code
@@ -269,13 +269,13 @@ send_with_logging() {
 }
 
 # Create log file if it doesn't exist
-touch /tmp/wirepusher.log
+touch /tmp/pincho.log
 
-send_with_logging "Logging Test" "Testing logging and debugging patterns" "/tmp/wirepusher.log"
+send_with_logging "Logging Test" "Testing logging and debugging patterns" "/tmp/pincho.log"
 
 echo ""
 echo "Recent log entries:"
-tail -n 3 /tmp/wirepusher.log | sed 's/^/  /'
+tail -n 3 /tmp/pincho.log | sed 's/^/  /'
 
 # Disable debug mode
 # set +x
@@ -300,7 +300,7 @@ batch_send_with_tracking() {
         total_count=$((total_count + 1))
         echo "  Sending: $title..."
 
-        if wirepusher_send --title "$title" --message "$message"; then
+        if pincho_send --title "$title" --message "$message"; then
             success_count=$((success_count + 1))
             echo "    ✓ Sent ($success_count/$total_count)"
         else
@@ -382,13 +382,13 @@ safe_send() {
     # (Note: The library already handles JSON escaping, this is just an example)
 
     # Check if token is set
-    if [ -z "$WIREPUSHER_TOKEN" ]; then
-        echo "Error: WIREPUSHER_TOKEN not set" >&2
+    if [ -z "$PINCHO_TOKEN" ]; then
+        echo "Error: PINCHO_TOKEN not set" >&2
         return 1
     fi
 
     # Send with error handling
-    if ! wirepusher_send --title "$title" --message "$message"; then
+    if ! pincho_send --title "$title" --message "$message"; then
         exit_code=$?
         echo "Error: Failed to send notification (exit code $exit_code)" >&2
         return $exit_code

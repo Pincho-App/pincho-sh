@@ -10,14 +10,14 @@
 set -e
 
 # Source the library
-. ../wirepusher.sh
+. ../pincho.sh
 
 # Check if credentials are set
-if [ -z "$WIREPUSHER_TOKEN" ]; then
-    echo "Error: Please set WIREPUSHER_TOKEN environment variable" >&2
+if [ -z "$PINCHO_TOKEN" ]; then
+    echo "Error: Please set PINCHO_TOKEN environment variable" >&2
     echo "" >&2
     echo "Example:" >&2
-    echo "  export WIREPUSHER_TOKEN='wpt_your_token'" >&2
+    echo "  export PINCHO_TOKEN='pnc_your_token'" >&2
     exit 1
 fi
 
@@ -26,7 +26,7 @@ echo ""
 
 # Example 1: Simple text conversion
 echo "1. Converting simple text to notification..."
-response=$(wirepusher_notifai "Deploy server and restart all services")
+response=$(pincho_notifai "Deploy server and restart all services")
 if [ $? -eq 0 ]; then
     echo "✓ AI conversion successful!"
     echo "Response: $response"
@@ -39,7 +39,7 @@ echo ""
 
 # Example 2: Text with type
 echo "2. Converting text with type specification..."
-response=$(wirepusher_notifai --text "Check error logs for database connection issues" --type "monitoring")
+response=$(pincho_notifai --text "Check error logs for database connection issues" --type "monitoring")
 if [ $? -eq 0 ]; then
     echo "✓ AI conversion successful!"
     echo "Response: $response"
@@ -54,7 +54,7 @@ echo ""
 echo "3. Converting longer text with context..."
 text="Build #147 completed successfully. All tests passed (324/324). "
 text="${text}Code coverage increased to 87%. Ready for deployment to staging environment."
-response=$(wirepusher_notifai --text "$text" --type "ci-cd")
+response=$(pincho_notifai --text "$text" --type "ci-cd")
 if [ $? -eq 0 ]; then
     echo "✓ AI conversion successful!"
     echo "Response: $response"
@@ -67,7 +67,7 @@ echo ""
 
 # Example 4: Action-oriented text
 echo "4. Converting action-oriented text..."
-response=$(wirepusher_notifai "SSL certificate expires in 7 days - renew immediately")
+response=$(pincho_notifai "SSL certificate expires in 7 days - renew immediately")
 if [ $? -eq 0 ]; then
     echo "✓ AI conversion successful!"
     echo "Response: $response"
@@ -80,7 +80,7 @@ echo ""
 
 # Example 5: Error notification
 echo "5. Converting error message..."
-response=$(wirepusher_notifai "API server returned 500 error - database connection timeout after 30 seconds")
+response=$(pincho_notifai "API server returned 500 error - database connection timeout after 30 seconds")
 if [ $? -eq 0 ]; then
     echo "✓ AI conversion successful!"
     echo "Response: $response"
@@ -93,4 +93,4 @@ echo ""
 echo "=== All NotifAI conversions completed successfully! ==="
 echo ""
 echo "Rate limit info:"
-[ -n "$WIREPUSHER_LAST_RATE_REMAINING" ] && echo "  Remaining: $WIREPUSHER_LAST_RATE_REMAINING/$WIREPUSHER_LAST_RATE_LIMIT"
+[ -n "$PINCHO_LAST_RATE_REMAINING" ] && echo "  Remaining: $PINCHO_LAST_RATE_REMAINING/$PINCHO_LAST_RATE_LIMIT"

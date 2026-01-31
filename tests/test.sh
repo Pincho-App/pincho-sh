@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Test Suite for WirePusher Shell Scripts
+# Test Suite for Pincho Shell Scripts
 #
 # This test suite validates the core functionality without requiring external tools.
 # It uses a mock HTTP server approach by testing the JSON generation logic.
@@ -18,11 +18,11 @@ TESTS_PASSED=0
 TESTS_FAILED=0
 
 # Mock environment variables for testing
-export WIREPUSHER_TOKEN="test_token"
-export WIREPUSHER_URL="http://localhost:9999/send"  # Non-existent URL for safety
+export PINCHO_TOKEN="test_token"
+export PINCHO_URL="http://localhost:9999/send"  # Non-existent URL for safety
 
 # Source the library
-. ../wirepusher.sh
+. ../pincho.sh
 
 # Test framework functions
 test_start() {
@@ -49,7 +49,7 @@ test_json_escaping() {
 
     input='Hello "World"'
     expected='Hello \"World\"'
-    result=$(_wirepusher_escape_json "$input")
+    result=$(_pincho_escape_json "$input")
 
     if [ "$result" = "$expected" ]; then
         test_pass
@@ -63,7 +63,7 @@ test_json_escaping_backslash() {
     test_start "JSON escaping with backslashes"
 
     input='C:\Users\Test'
-    result=$(_wirepusher_escape_json "$input")
+    result=$(_pincho_escape_json "$input")
 
     # Should escape backslashes
     if echo "$result" | grep -q '\\\\'; then
@@ -78,7 +78,7 @@ test_validation_missing_title() {
     test_start "Validation error on missing title"
 
     # Capture output and exit code
-    output=$(wirepusher_send "" "Message" 2>&1)
+    output=$(pincho_send "" "Message" 2>&1)
     exit_code=$?
 
     if [ $exit_code -eq 2 ] && echo "$output" | grep -q "Title is required"; then
@@ -92,7 +92,7 @@ test_validation_missing_title() {
 test_validation_missing_message() {
     test_start "Validation error on missing message"
 
-    output=$(wirepusher_send "Title" "" 2>&1)
+    output=$(pincho_send "Title" "" 2>&1)
     exit_code=$?
 
     if [ $exit_code -eq 2 ] && echo "$output" | grep -q "Message is required"; then
@@ -107,16 +107,16 @@ test_validation_missing_token() {
     test_start "Validation error on missing token"
 
     # Temporarily unset token
-    old_token="$WIREPUSHER_TOKEN"
-    unset WIREPUSHER_TOKEN
+    old_token="$PINCHO_TOKEN"
+    unset PINCHO_TOKEN
 
-    output=$(wirepusher_send "Title" "Message" 2>&1)
+    output=$(pincho_send "Title" "Message" 2>&1)
     exit_code=$?
 
     # Restore token
-    export WIREPUSHER_TOKEN="$old_token"
+    export PINCHO_TOKEN="$old_token"
 
-    if [ $exit_code -eq 2 ] && echo "$output" | grep -q "WIREPUSHER_TOKEN"; then
+    if [ $exit_code -eq 2 ] && echo "$output" | grep -q "PINCHO_TOKEN"; then
         test_pass
     else
         test_fail "Expected validation error for missing token"
@@ -128,7 +128,7 @@ test_validation_title_too_long() {
     test_start "Validation error on title too long"
 
     long_title=$(printf 'a%.0s' $(seq 1 257))
-    output=$(wirepusher_send "$long_title" "Message" 2>&1)
+    output=$(pincho_send "$long_title" "Message" 2>&1)
     exit_code=$?
 
     if [ $exit_code -eq 2 ] && echo "$output" | grep -q "256 characters"; then
@@ -143,7 +143,7 @@ test_validation_message_too_long() {
     test_start "Validation error on message too long"
 
     long_message=$(printf 'a%.0s' $(seq 1 4097))
-    output=$(wirepusher_send "Title" "$long_message" 2>&1)
+    output=$(pincho_send "Title" "$long_message" 2>&1)
     exit_code=$?
 
     if [ $exit_code -eq 2 ] && echo "$output" | grep -q "4096 characters"; then
@@ -158,7 +158,7 @@ test_named_arguments() {
     test_start "Named arguments parsing"
 
     # This will fail with network error, but we're testing argument parsing
-    output=$(wirepusher_send --title "Test" --message "Message" --type "info" 2>&1)
+    output=$(pincho_send --title "Test" --message "Message" --type "info" 2>&1)
 
     # Should not fail with validation error
     if ! echo "$output" | grep -q "Title is required"; then
@@ -172,7 +172,7 @@ test_named_arguments() {
 test_dependency_check() {
     test_start "Dependency check for curl"
 
-    if wirepusher_check_dependencies >/dev/null 2>&1; then
+    if pincho_check_dependencies >/dev/null 2>&1; then
         test_pass
     else
         test_fail "Dependency check failed"
@@ -183,9 +183,9 @@ test_dependency_check() {
 test_version_function() {
     test_start "Version function returns output"
 
-    output=$(wirepusher_version)
+    output=$(pincho_version)
 
-    if [ -n "$output" ] && echo "$output" | grep -q "WirePusher"; then
+    if [ -n "$output" ] && echo "$output" | grep -q "Pincho"; then
         test_pass
     else
         test_fail "Version function did not return expected output"
@@ -195,9 +195,9 @@ test_version_function() {
 # Run all tests
 run_tests() {
     printf "\n"
-    printf "═══════════════════════════════════════════════════════\n"
-    printf "  WirePusher Shell Scripts Test Suite\n"
-    printf "═══════════════════════════════════════════════════════\n\n"
+    printf "=======================================================\n"
+    printf "  Pincho Shell Scripts Test Suite\n"
+    printf "=======================================================\n\n"
 
     test_json_escaping
     test_json_escaping_backslash
@@ -211,9 +211,9 @@ run_tests() {
     test_version_function
 
     printf "\n"
-    printf "═══════════════════════════════════════════════════════\n"
+    printf "=======================================================\n"
     printf "  Test Results\n"
-    printf "═══════════════════════════════════════════════════════\n"
+    printf "=======================================================\n"
     printf "Tests run:    %d\n" "$TESTS_RUN"
     printf "${GREEN}Tests passed: %d${NC}\n" "$TESTS_PASSED"
 

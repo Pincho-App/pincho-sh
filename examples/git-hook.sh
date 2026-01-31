@@ -9,14 +9,14 @@
 #   1. Copy this script to .git/hooks/post-receive
 #   2. Make it executable: chmod +x .git/hooks/post-receive
 #   3. Set environment variables in .git/hooks/post-receive:
-#      export WIREPUSHER_TOKEN="wpt_your_token"
+#      export PINCHO_TOKEN="pnc_your_token"
 #
 # Or for a pre-commit hook that checks for TODOs:
 #   Copy to .git/hooks/pre-commit
 #
 
 # Source the library (adjust path as needed)
-. ../wirepusher.sh
+. ../pincho.sh
 
 # Get repository name
 REPO_NAME=$(basename "$(git rev-parse --show-toplevel)")
@@ -57,7 +57,7 @@ while read oldrev newrev refname; do
     author=$(git log -1 --pretty=format:"%an" "$newrev" 2>/dev/null || echo "Unknown")
 
     # Send notification
-    wirepusher_send \
+    pincho_send \
         --title "🔄 ${REPO_NAME}" \
         --message "$message\n\nAuthor: $author" \
         --type "$notification_type" \

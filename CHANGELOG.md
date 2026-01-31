@@ -9,26 +9,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **NotifAI endpoint support** - AI-powered text-to-notification conversion
-  - `wirepusher_notifai()` function in both `wirepusher.sh` and `wirepusher-bash.sh`
+  - `pincho_notifai()` function in both `pincho.sh` and `pincho-bash.sh`
   - Converts free-form text (5-2500 chars) into structured notifications using AI
   - Supports optional `--type` parameter for categorization
-  - Same error handling and rate limiting as `wirepusher_send()`
+  - Same error handling and rate limiting as `pincho_send()`
   - Rate limit: 50 requests/hour per token
   - `examples/notifai.sh` - Comprehensive example with 5 use cases
   - Documentation in `README.md`, `docs/ADVANCED.md`, and `examples/README.md`
 
 ### Changed
 - **Documentation overhaul** - Complete redesign and streamlining of documentation (35% reduction overall)
-  - **WIREPUSHER_ID removed** - Eliminated all references to deprecated v1 API user ID parameter (27 occurrences across 9 files)
+  - **PINCHO_ID removed** - Eliminated all references to deprecated v1 API user ID parameter (27 occurrences across 9 files)
   - `README.md` - Redesigned from 572 to 184 lines (68% reduction) following SDK best practices
   - `docs/ADVANCED.md` - Streamlined from 762 to 650 lines (15% reduction) with improved organization
   - `examples/README.md` - Condensed from 479 to 182 lines (62% reduction) focusing on practical examples
   - Improved navigation and cross-linking between documentation files
   - Better separation of concerns (basic → README, advanced → ADVANCED.md, security → SECURITY.md)
 - **Rate limit monitoring** - Automatic parsing and export of rate limit headers after each API call
-  - `WIREPUSHER_LAST_RATE_LIMIT` - Total requests allowed per hour
-  - `WIREPUSHER_LAST_RATE_REMAINING` - Requests remaining in current window
-  - `WIREPUSHER_LAST_RATE_RESET` - Unix timestamp when rate limit resets
+  - `PINCHO_LAST_RATE_LIMIT` - Total requests allowed per hour
+  - `PINCHO_LAST_RATE_REMAINING` - Requests remaining in current window
+  - `PINCHO_LAST_RATE_RESET` - Unix timestamp when rate limit resets
 - `examples/rate-limits.sh` - Comprehensive example demonstrating rate limit monitoring and batch sending with rate limit awareness
 - `examples/error-handling.sh` - Comprehensive error handling patterns with retry logic, exponential backoff, and error-specific recovery strategies
 - `examples/parallel-send.sh` - Parallel notification sending using xargs and GNU parallel with performance comparison and rate limit awareness
@@ -37,7 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Multi-shell compatibility testing (sh/dash, bash)
   - Automated test suite execution
   - Release artifact generation (tarball)
-  - Automatic release notifications via WirePusher
+  - Automatic release notifications via Pincho
 - **Documentation** - Added comprehensive documentation:
   - `docs/SECURITY.md` - Security best practices for shell script users (225 lines)
   - `docs/ADVANCED.md` - Advanced usage patterns and integrations (675 lines)
@@ -46,21 +46,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `CLAUDE.md` - AI assistant context with architecture and design decisions (390 lines)
 
 ### Changed
-- **Repository renamed** from `shell-scripts` to `wirepusher-sh` to align with SDK naming convention (`wirepusher-{language}`)
+- **Repository renamed** from `shell-scripts` to `pincho-sh` to align with SDK naming convention (`pincho-{language}`)
   - All documentation and URLs updated
   - GitLab automatically redirects old URLs to new repository name
-- Updated header comments in both `wirepusher.sh` and `wirepusher-bash.sh` to document rate limit environment variables
+- Updated header comments in both `pincho.sh` and `pincho-bash.sh` to document rate limit environment variables
 
 ## [1.0.0] - 2025-10-26
 
 ### Added
-- Initial release of WirePusher Shell Scripts Library
-- `wirepusher.sh` - POSIX sh compatible library
-- `wirepusher-bash.sh` - Bash-enhanced version with better array handling
-- `wirepusher_send()` function with:
+- Initial release of Pincho Shell Scripts Library
+- `pincho.sh` - POSIX sh compatible library
+- `pincho-bash.sh` - Bash-enhanced version with better array handling
+- `pincho_send()` function with:
   - Positional arguments support (title, message)
   - Named arguments support (--title, --message, --type, --tag, --image, --action)
-  - Environment variable configuration (WIREPUSHER_TOKEN)
+  - Environment variable configuration (PINCHO_TOKEN)
   - Comprehensive error handling with specific exit codes
   - JSON escaping for special characters
   - curl-based HTTP client with proper error handling
@@ -91,7 +91,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Validation** - Title/message length, required fields, tag count
 - **Multiple tags** - Support for up to 10 tags
 - **Optional fields** - Type, tags, image URL, action URL
-- **Environment configuration** - WIREPUSHER_TOKEN, WIREPUSHER_URL
+- **Environment configuration** - PINCHO_TOKEN, PINCHO_URL
 
-[Unreleased]: https://gitlab.com/wirepusher/wirepusher-sh/-/compare/v1.0.0...main
-[1.0.0]: https://gitlab.com/wirepusher/wirepusher-sh/-/tags/v1.0.0
+[Unreleased]: https://gitlab.com/pincho/pincho-sh/-/compare/v1.0.0...main
+[1.0.0]: https://gitlab.com/pincho/pincho-sh/-/tags/v1.0.0

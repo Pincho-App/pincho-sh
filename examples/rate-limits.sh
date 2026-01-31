@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# WirePusher Rate Limit Monitoring Example
+# Pincho Rate Limit Monitoring Example
 #
 # This example demonstrates:
 # - Monitoring rate limit information after API calls
@@ -12,30 +12,30 @@
 # - Resets hourly based on first request timestamp
 #
 # Environment variables:
-#   WIREPUSHER_TOKEN - Your API token (required)
+#   PINCHO_TOKEN - Your API token (required)
 #
 
 set -e  # Exit on error
 
-# Source the WirePusher library
+# Source the Pincho library
 # shellcheck disable=SC1091
-. "$(dirname "$0")/../wirepusher.sh"
+. "$(dirname "$0")/../pincho.sh"
 
 # Check for required environment variables
-if [ -z "$WIREPUSHER_TOKEN" ]; then
-    echo "Error: WIREPUSHER_TOKEN environment variable is required" >&2
-    echo "Usage: WIREPUSHER_TOKEN=your-token ./rate-limits.sh" >&2
+if [ -z "$PINCHO_TOKEN" ]; then
+    echo "Error: PINCHO_TOKEN environment variable is required" >&2
+    echo "Usage: PINCHO_TOKEN=your-token ./rate-limits.sh" >&2
     exit 1
 fi
 
-echo "=== WirePusher Rate Limit Monitoring ==="
+echo "=== Pincho Rate Limit Monitoring ==="
 echo ""
 
 # Example 1: Single notification with rate limit check
 echo "1. Sending notification and checking rate limits..."
 echo ""
 
-if wirepusher_send \
+if pincho_send \
     --title "Rate Limit Test" \
     --message "Testing rate limit monitoring" \
     --type "test"; then
@@ -45,15 +45,15 @@ if wirepusher_send \
     echo ""
 
     # Check rate limit information (exported after API call)
-    if [ -n "$WIREPUSHER_LAST_RATE_LIMIT" ]; then
+    if [ -n "$PINCHO_LAST_RATE_LIMIT" ]; then
         echo "Rate Limit Information:"
-        echo "  Total allowed:  $WIREPUSHER_LAST_RATE_LIMIT requests/hour"
-        echo "  Remaining:      $WIREPUSHER_LAST_RATE_REMAINING requests"
-        echo "  Resets at:      $WIREPUSHER_LAST_RATE_RESET (Unix timestamp)"
+        echo "  Total allowed:  $PINCHO_LAST_RATE_LIMIT requests/hour"
+        echo "  Remaining:      $PINCHO_LAST_RATE_REMAINING requests"
+        echo "  Resets at:      $PINCHO_LAST_RATE_RESET (Unix timestamp)"
 
         # Convert timestamp to human-readable format (if date command supports it)
-        if date -r "$WIREPUSHER_LAST_RATE_RESET" >/dev/null 2>&1; then
-            reset_time=$(date -r "$WIREPUSHER_LAST_RATE_RESET" "+%Y-%m-%d %H:%M:%S")
+        if date -r "$PINCHO_LAST_RATE_RESET" >/dev/null 2>&1; then
+            reset_time=$(date -r "$PINCHO_LAST_RATE_RESET" "+%Y-%m-%d %H:%M:%S")
             echo "                  $reset_time"
         fi
     else
@@ -82,26 +82,26 @@ echo ""
 for i in $(seq 1 $batch_size); do
     echo "Sending notification $i/$batch_size..."
 
-    if wirepusher_send \
+    if pincho_send \
         --title "Batch Test $i" \
         --message "This is notification $i of $batch_size" \
         --type "batch-test" \
         --tag "batch"; then
 
         # Show rate limit after each send
-        if [ -n "$WIREPUSHER_LAST_RATE_REMAINING" ]; then
-            echo "  ✓ Sent ($WIREPUSHER_LAST_RATE_REMAINING requests remaining)"
+        if [ -n "$PINCHO_LAST_RATE_REMAINING" ]; then
+            echo "  ✓ Sent ($PINCHO_LAST_RATE_REMAINING requests remaining)"
 
             # Warn when getting close to rate limit
-            if [ "$WIREPUSHER_LAST_RATE_REMAINING" -le 5 ]; then
-                echo "  ⚠ Warning: Only $WIREPUSHER_LAST_RATE_REMAINING requests remaining!"
+            if [ "$PINCHO_LAST_RATE_REMAINING" -le 5 ]; then
+                echo "  ⚠ Warning: Only $PINCHO_LAST_RATE_REMAINING requests remaining!"
 
-                if [ "$WIREPUSHER_LAST_RATE_REMAINING" -eq 0 ]; then
+                if [ "$PINCHO_LAST_RATE_REMAINING" -eq 0 ]; then
                     echo "  ⚠ Rate limit exhausted. Waiting for reset..."
 
                     # Calculate seconds until reset
                     current_time=$(date +%s)
-                    seconds_until_reset=$((WIREPUSHER_LAST_RATE_RESET - current_time))
+                    seconds_until_reset=$((PINCHO_LAST_RATE_RESET - current_time))
 
                     if [ $seconds_until_reset -gt 0 ]; then
                         echo "  ⏳ Sleeping for $seconds_until_reset seconds..."
@@ -123,15 +123,15 @@ for i in $(seq 1 $batch_size); do
             echo "Rate limit exceeded. Stopping batch send."
             echo ""
 
-            if [ -n "$WIREPUSHER_LAST_RATE_RESET" ]; then
+            if [ -n "$PINCHO_LAST_RATE_RESET" ]; then
                 current_time=$(date +%s)
-                seconds_until_reset=$((WIREPUSHER_LAST_RATE_RESET - current_time))
+                seconds_until_reset=$((PINCHO_LAST_RATE_RESET - current_time))
 
                 if [ $seconds_until_reset -gt 0 ]; then
                     echo "Rate limit will reset in $seconds_until_reset seconds."
 
-                    if date -r "$WIREPUSHER_LAST_RATE_RESET" >/dev/null 2>&1; then
-                        reset_time=$(date -r "$WIREPUSHER_LAST_RATE_RESET" "+%Y-%m-%d %H:%M:%S")
+                    if date -r "$PINCHO_LAST_RATE_RESET" >/dev/null 2>&1; then
+                        reset_time=$(date -r "$PINCHO_LAST_RATE_RESET" "+%Y-%m-%d %H:%M:%S")
                         echo "Reset time: $reset_time"
                     fi
                 else
@@ -167,7 +167,7 @@ send_with_rate_limit_handling() {
     local retry_count=0
 
     while [ $retry_count -lt $max_retries ]; do
-        if wirepusher_send --title "$title" --message "$message"; then
+        if pincho_send --title "$title" --message "$message"; then
             return 0
         fi
 
@@ -180,9 +180,9 @@ send_with_rate_limit_handling() {
             if [ $retry_count -lt $max_retries ]; then
                 echo "  ⚠ Rate limit hit. Waiting for reset (attempt $retry_count/$max_retries)..."
 
-                if [ -n "$WIREPUSHER_LAST_RATE_RESET" ]; then
+                if [ -n "$PINCHO_LAST_RATE_RESET" ]; then
                     current_time=$(date +%s)
-                    seconds_until_reset=$((WIREPUSHER_LAST_RATE_RESET - current_time + 5))
+                    seconds_until_reset=$((PINCHO_LAST_RATE_RESET - current_time + 5))
 
                     if [ $seconds_until_reset -gt 0 ]; then
                         echo "  ⏳ Sleeping for $seconds_until_reset seconds..."
@@ -219,8 +219,8 @@ for i in $(seq 1 $test_count); do
         "Intelligent Batch $i" \
         "This is notification $i with automatic rate limit handling"; then
 
-        if [ -n "$WIREPUSHER_LAST_RATE_REMAINING" ]; then
-            echo "  ✓ Sent ($WIREPUSHER_LAST_RATE_REMAINING requests remaining)"
+        if [ -n "$PINCHO_LAST_RATE_REMAINING" ]; then
+            echo "  ✓ Sent ($PINCHO_LAST_RATE_REMAINING requests remaining)"
         else
             echo "  ✓ Sent"
         fi
@@ -240,21 +240,21 @@ echo ""
 
 # Final rate limit status
 echo "Final rate limit status:"
-if [ -n "$WIREPUSHER_LAST_RATE_LIMIT" ]; then
-    echo "  Total allowed:  $WIREPUSHER_LAST_RATE_LIMIT requests/hour"
-    echo "  Remaining:      $WIREPUSHER_LAST_RATE_REMAINING requests"
+if [ -n "$PINCHO_LAST_RATE_LIMIT" ]; then
+    echo "  Total allowed:  $PINCHO_LAST_RATE_LIMIT requests/hour"
+    echo "  Remaining:      $PINCHO_LAST_RATE_REMAINING requests"
 
     # Calculate percentage used
-    used=$((WIREPUSHER_LAST_RATE_LIMIT - WIREPUSHER_LAST_RATE_REMAINING))
-    percentage=$((used * 100 / WIREPUSHER_LAST_RATE_LIMIT))
+    used=$((PINCHO_LAST_RATE_LIMIT - PINCHO_LAST_RATE_REMAINING))
+    percentage=$((used * 100 / PINCHO_LAST_RATE_LIMIT))
 
     echo "  Used:           $used requests ($percentage%)"
 
-    if date -r "$WIREPUSHER_LAST_RATE_RESET" >/dev/null 2>&1; then
-        reset_time=$(date -r "$WIREPUSHER_LAST_RATE_RESET" "+%Y-%m-%d %H:%M:%S")
+    if date -r "$PINCHO_LAST_RATE_RESET" >/dev/null 2>&1; then
+        reset_time=$(date -r "$PINCHO_LAST_RATE_RESET" "+%Y-%m-%d %H:%M:%S")
         echo "  Resets at:      $reset_time"
     else
-        echo "  Resets at:      $WIREPUSHER_LAST_RATE_RESET (Unix timestamp)"
+        echo "  Resets at:      $PINCHO_LAST_RATE_RESET (Unix timestamp)"
     fi
 else
     echo "  Rate limit information not available"

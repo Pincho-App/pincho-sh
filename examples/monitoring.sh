@@ -16,7 +16,7 @@
 set -e
 
 # Source the library
-. ../wirepusher.sh
+. ../pincho.sh
 
 # Configuration
 SERVICES="nginx postgresql redis"  # Space-separated list of services to check
@@ -40,7 +40,7 @@ check_service() {
     else
         echo "✗ $service_name is not running"
 
-        wirepusher_send \
+        pincho_send \
             --title "⚠️ Service Down" \
             --message "Service '$service_name' is not running on $(hostname)\n\nPlease investigate immediately." \
             --type "alert" \
@@ -65,7 +65,7 @@ check_website() {
     else
         echo "✗ $url is not accessible"
 
-        wirepusher_send \
+        pincho_send \
             --title "⚠️ Website Down" \
             --message "Website $url is not accessible from $(hostname)\n\nHTTP request failed.\n\nPlease investigate immediately." \
             --type "alert" \
@@ -108,7 +108,7 @@ check_ssl_cert() {
     if [ "$days_until_expiry" -le "$SSL_CERT_WARN_DAYS" ]; then
         echo "⚠️  SSL certificate for $domain expires in $days_until_expiry days"
 
-        wirepusher_send \
+        pincho_send \
             --title "⚠️ SSL Certificate Expiring" \
             --message "SSL certificate for $domain will expire in $days_until_expiry days\n\nExpiry date: $expiry_date\n\nPlease renew the certificate." \
             --type "alert" \
@@ -160,7 +160,7 @@ fi
 if [ $all_healthy -eq 0 ]; then
     echo "All health checks passed!"
 
-    wirepusher_send \
+    pincho_send \
         --title "✓ Health Check: All Systems Operational" \
         --message "All monitored services, websites, and SSL certificates are healthy on $(hostname)" \
         --type "info" \

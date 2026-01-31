@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# WirePusher Parallel Send Example
+# Pincho Parallel Send Example
 #
 # This example demonstrates:
 # - Parallel notification sending using xargs
@@ -14,31 +14,31 @@
 #   Install: apt install parallel / brew install parallel
 #
 # Environment variables:
-#   WIREPUSHER_TOKEN - Your API token (required)
+#   PINCHO_TOKEN - Your API token (required)
 #
 
 # Note: Using 'set -e' is NOT recommended for parallel examples
 # because we want to handle errors gracefully
 
-# Source the WirePusher library
+# Source the Pincho library
 # shellcheck disable=SC1091
-. "$(dirname "$0")/../wirepusher.sh"
+. "$(dirname "$0")/../pincho.sh"
 
 # Check for required environment variables
-if [ -z "$WIREPUSHER_TOKEN" ]; then
-    echo "Error: WIREPUSHER_TOKEN environment variable is required" >&2
-    echo "Usage: WIREPUSHER_TOKEN=your-token ./parallel-send.sh" >&2
+if [ -z "$PINCHO_TOKEN" ]; then
+    echo "Error: PINCHO_TOKEN environment variable is required" >&2
+    echo "Usage: PINCHO_TOKEN=your-token ./parallel-send.sh" >&2
     exit 1
 fi
 
-echo "=== WirePusher Parallel Sending Examples ==="
+echo "=== Pincho Parallel Sending Examples ==="
 echo ""
 
 # Helper function to send a single notification (for parallel processing)
 send_one() {
     local number="$1"
 
-    if wirepusher_send \
+    if pincho_send \
         --title "Parallel Test $number" \
         --message "This is notification $number sent in parallel" \
         --type "parallel-test" \
@@ -53,7 +53,7 @@ send_one() {
 
 # Export the function and token for subshells
 export -f send_one 2>/dev/null || true
-export WIREPUSHER_TOKEN
+export PINCHO_TOKEN
 
 # Example 1: Sequential sending (baseline)
 echo "1. Sequential sending (baseline)..."
@@ -92,10 +92,10 @@ start_time=$(date +%s)
 # -n: max args per process
 # -I: replacement string
 seq 1 $xargs_count | xargs -P "$max_parallel" -n 1 -I {} sh -c '
-    . "$(dirname "$0")/../wirepusher.sh"
+    . "$(dirname "$0")/../pincho.sh"
     send_one() {
         local number="$1"
-        if wirepusher_send \
+        if pincho_send \
             --title "xargs Test $number" \
             --message "Notification $number via xargs" \
             --type "xargs-test"; then
@@ -138,8 +138,8 @@ if command -v parallel >/dev/null 2>&1; then
 
     # GNU parallel with progress bar and job control
     seq 1 $parallel_count | parallel --jobs 3 --progress '
-        . "$(dirname "$0")/../wirepusher.sh"
-        if wirepusher_send \
+        . "$(dirname "$0")/../pincho.sh"
+        if pincho_send \
             --title "GNU Parallel Test {}" \
             --message "Notification {} via GNU parallel" \
             --type "parallel-test"; then
@@ -192,7 +192,7 @@ safe_parallel_send() {
 
     # Send first notification to get rate limit info
     echo "Checking rate limit status..."
-    if ! wirepusher_send \
+    if ! pincho_send \
         --title "Rate Check" \
         --message "Checking rate limit before parallel send" \
         --type "rate-check"; then
@@ -200,8 +200,8 @@ safe_parallel_send() {
         return 1
     fi
 
-    if [ -n "$WIREPUSHER_LAST_RATE_REMAINING" ]; then
-        remaining=$WIREPUSHER_LAST_RATE_REMAINING
+    if [ -n "$PINCHO_LAST_RATE_REMAINING" ]; then
+        remaining=$PINCHO_LAST_RATE_REMAINING
         echo "Rate limit status: $remaining requests remaining"
 
         if [ "$remaining" -lt "$total_count" ]; then
@@ -218,8 +218,8 @@ safe_parallel_send() {
 
     # Use xargs for parallel sending
     seq 1 "$total_count" | xargs -P "$max_concurrent" -n 1 -I {} sh -c '
-        . "$(dirname "$0")/../wirepusher.sh"
-        if wirepusher_send \
+        . "$(dirname "$0")/../pincho.sh"
+        if pincho_send \
             --title "Safe Parallel {}" \
             --message "Notification {} with rate limit awareness" \
             --type "safe-parallel"; then
@@ -268,7 +268,7 @@ echo ""
 
 # Read file and send in parallel using xargs
 cat "$notifications_file" | xargs -P 3 -n 1 -I {} sh -c '
-    . "$(dirname "$0")/../wirepusher.sh"
+    . "$(dirname "$0")/../pincho.sh"
 
     # Parse CSV line
     line="{}"
@@ -276,7 +276,7 @@ cat "$notifications_file" | xargs -P 3 -n 1 -I {} sh -c '
     message=$(echo "$line" | cut -d, -f2)
     type=$(echo "$line" | cut -d, -f3)
 
-    if wirepusher_send --title "$title" --message "$message" --type "$type"; then
+    if pincho_send --title "$title" --message "$message" --type "$type"; then
         echo "✓ Sent: $title"
     else
         echo "✗ Failed: $title" >&2

@@ -16,7 +16,7 @@
 set -e
 
 # Source the library
-. ../wirepusher.sh
+. ../pincho.sh
 
 # Configuration
 DISK_THRESHOLD=80  # Alert if disk usage exceeds 80%
@@ -33,7 +33,7 @@ check_disk_usage() {
         if [ "$usage" -ge "$DISK_THRESHOLD" ]; then
             echo "⚠️  Disk usage is ${usage}% (threshold: ${DISK_THRESHOLD}%)"
 
-            wirepusher_send \
+            pincho_send \
                 --title "⚠️ Disk Space Alert" \
                 --message "Disk usage on $(hostname) is at ${usage}%\n\nThreshold: ${DISK_THRESHOLD}%\n\nPlease investigate and free up disk space." \
                 --type "alert" \
@@ -64,7 +64,7 @@ check_memory_usage_linux() {
     if [ "$usage" -ge "$MEM_THRESHOLD" ]; then
         echo "⚠️  Memory usage is ${usage}% (threshold: ${MEM_THRESHOLD}%)"
 
-        wirepusher_send \
+        pincho_send \
             --title "⚠️ Memory Alert" \
             --message "Memory usage on $(hostname) is at ${usage}%\n\nThreshold: ${MEM_THRESHOLD}%\n\nTop processes:\n$(ps aux --sort=-%mem | head -6)" \
             --type "alert" \
@@ -100,7 +100,7 @@ check_memory_usage_macos() {
     if [ "$usage" -ge "$MEM_THRESHOLD" ]; then
         echo "⚠️  Memory usage is ${usage}% (threshold: ${MEM_THRESHOLD}%)"
 
-        wirepusher_send \
+        pincho_send \
             --title "⚠️ Memory Alert" \
             --message "Memory usage on $(hostname) is at ${usage}%\n\nThreshold: ${MEM_THRESHOLD}%\n\nTop processes:\n$(ps aux -m | head -6)" \
             --type "alert" \

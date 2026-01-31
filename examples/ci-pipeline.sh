@@ -15,7 +15,7 @@
 set -e
 
 # Source the library
-. ../wirepusher.sh
+. ../pincho.sh
 
 # Get event type
 EVENT="${1:-unknown}"
@@ -56,7 +56,7 @@ send_notification() {
 
     case "$event" in
         started|start|begin)
-            wirepusher_send \
+            pincho_send \
                 --title "🔄 Build Started" \
                 --message "CI/CD pipeline started\n\nSystem: $CI_SYSTEM\nRepository: $REPO\nBranch: $BRANCH\nCommit: $COMMIT" \
                 --type "ci-started" \
@@ -66,7 +66,7 @@ send_notification() {
             ;;
 
         success|passed|pass)
-            wirepusher_send \
+            pincho_send \
                 --title "✅ Build Successful" \
                 --message "CI/CD pipeline completed successfully\n\nSystem: $CI_SYSTEM\nRepository: $REPO\nBranch: $BRANCH\nCommit: $COMMIT" \
                 --type "ci-success" \
@@ -81,7 +81,7 @@ send_notification() {
                 error_text="\n\nError: $ERROR_MESSAGE"
             fi
 
-            wirepusher_send \
+            pincho_send \
                 --title "❌ Build Failed" \
                 --message "CI/CD pipeline failed\n\nSystem: $CI_SYSTEM\nRepository: $REPO\nBranch: $BRANCH\nCommit: $COMMIT${error_text}" \
                 --type "ci-failure" \
@@ -91,7 +91,7 @@ send_notification() {
             ;;
 
         deploy-success)
-            wirepusher_send \
+            pincho_send \
                 --title "🚀 Deployment Successful" \
                 --message "Application deployed successfully\n\nSystem: $CI_SYSTEM\nRepository: $REPO\nBranch: $BRANCH\nCommit: $COMMIT" \
                 --type "deployment" \
@@ -107,7 +107,7 @@ send_notification() {
                 error_text="\n\nError: $ERROR_MESSAGE"
             fi
 
-            wirepusher_send \
+            pincho_send \
                 --title "⚠️ Deployment Failed" \
                 --message "Application deployment failed\n\nSystem: $CI_SYSTEM\nRepository: $REPO\nBranch: $BRANCH\nCommit: $COMMIT${error_text}" \
                 --type "deployment-failure" \

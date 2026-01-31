@@ -21,8 +21,18 @@ TESTS_FAILED=0
 export PINCHO_TOKEN="test_token"
 export PINCHO_URL="http://localhost:9999/send"  # Non-existent URL for safety
 
-# Source the library
-. ../pincho.sh
+# Determine script directory
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+# Source the library (handle both running from tests/ and repo root)
+if [ -f "${SCRIPT_DIR}/../pincho.sh" ]; then
+    . "${SCRIPT_DIR}/../pincho.sh"
+elif [ -f "./pincho.sh" ]; then
+    . ./pincho.sh
+else
+    echo "Error: Cannot find pincho.sh" >&2
+    exit 1
+fi
 
 # Test framework functions
 test_start() {

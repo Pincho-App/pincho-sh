@@ -36,7 +36,7 @@ This Code of Conduct applies within all community spaces, and also applies when 
 
 ## Enforcement
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the community leaders responsible for enforcement at [support@pincho.dev](mailto:support@pincho.dev). All complaints will be reviewed and investigated promptly and fairly.
+Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the community leaders responsible for enforcement at [support@pincho.app](mailto:support@pincho.app). All complaints will be reviewed and investigated promptly and fairly.
 
 All community leaders are obligated to respect the privacy and security of the reporter of any incident.
 
@@ -85,7 +85,7 @@ For answers to common questions about this code of conduct, see the FAQ at [http
 
 If you have questions or concerns about this Code of Conduct, please contact us at:
 
-- **Email**: support@pincho.dev
-- **GitLab Issues**: https://gitlab.com/pincho/pincho-sh/-/issues
+- **Email**: support@pincho.app
+- **GitHub Issues**: https://github.com/Pincho-App/pincho-sh/issues
 
 We are committed to providing a welcoming and inspiring community for all.

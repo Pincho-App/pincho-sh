@@ -15,13 +15,12 @@ The Pincho team takes security bugs seriously. We appreciate your efforts to res
 
 ### How to Report
 
-**Please do NOT report security vulnerabilities through public GitLab issues.**
+**Please do NOT report security vulnerabilities through public GitHub issues.**
 
 Instead, please report security vulnerabilities by:
 
-1. **Opening a confidential issue** on GitLab:
-   - Go to https://gitlab.com/pincho/pincho-sh/-/issues/new
-   - Check the "This issue is confidential" checkbox
+1. **Opening a security advisory** on GitHub:
+   - Go to https://github.com/Pincho-App/pincho-sh/security/advisories/new
    - Provide detailed information about the vulnerability
 
 2. **Include the following information**:
@@ -236,7 +235,7 @@ export PINCHO_TOKEN=$(cat ~/.pincho/token)
 
 - The library communicates over HTTPS with TLS encryption
 - Ensure your system's CA certificates are up-to-date
-- Test connectivity: `curl -v https://api.pincho.dev`
+- Test connectivity: `curl -v https://api.pincho.app`
 
 ### POSIX Compliance
 
@@ -246,7 +245,7 @@ Both `pincho.sh` (POSIX sh) and `pincho-bash.sh` (Bash) are audited for security
 
 Security updates will be released as:
 - **Patch versions** (e.g., 2.0.1) for security fixes
-- Tagged releases on GitLab
+- Tagged releases on GitHub
 - Announcements in `CHANGELOG.md`
 
 Security releases will:
@@ -265,7 +264,7 @@ We recognize security researchers who responsibly disclose vulnerabilities:
 
 If you have questions about this security policy, please:
 - Open a public issue for general security questions
-- Contact us at **support@pincho.dev** for private inquiries
+- Contact us at **support@pincho.app** for private inquiries
 
 ---
 

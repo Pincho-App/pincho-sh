@@ -93,5 +93,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Optional fields** - Type, tags, image URL, action URL
 - **Environment configuration** - PINCHO_TOKEN, PINCHO_URL
 
-[Unreleased]: https://gitlab.com/pincho/pincho-sh/-/compare/v1.0.0...main
-[1.0.0]: https://gitlab.com/pincho/pincho-sh/-/tags/v1.0.0
+[Unreleased]: https://github.com/Pincho-App/pincho-sh/compare/v1.0.0...main
+[1.0.0]: https://github.com/Pincho-App/pincho-sh/releases/tag/v1.0.0

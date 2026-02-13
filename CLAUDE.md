@@ -156,5 +156,5 @@ fi
 ## Links
 
 - **Website**: https://pincho.app
-- **Repository**: https://gitlab.com/pincho-app/pincho-sh
-- **CLI Tool**: https://gitlab.com/pincho-app/pincho-cli
+- **Repository**: https://github.com/Pincho-App/pincho-sh
+- **CLI Tool**: https://github.com/Pincho-App/pincho-cli

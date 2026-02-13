@@ -5,7 +5,7 @@
 # This script downloads and installs the Pincho shell script library.
 #
 # Usage:
-#   curl -sL https://gitlab.com/pincho-app/pincho-sh/-/raw/main/install.sh | sh
+#   curl -sL https://raw.githubusercontent.com/Pincho-App/pincho-sh/main/install.sh | sh
 #
 # Or with custom install location:
 #   INSTALL_DIR=/opt/pincho sh install.sh
@@ -29,7 +29,7 @@ else
 fi
 
 # Configuration
-REPO_URL="https://gitlab.com/pincho-app/pincho-sh/-/raw/main"
+REPO_URL="https://raw.githubusercontent.com/Pincho-App/pincho-sh/main"
 DEFAULT_INSTALL_DIR="/usr/local/lib/pincho"
 INSTALL_DIR="${INSTALL_DIR:-$DEFAULT_INSTALL_DIR}"
 
@@ -136,10 +136,10 @@ print_instructions() {
 
     printf "${BLUE}Examples:${NC}\n"
     printf "  View examples at:\n"
-    printf "  https://gitlab.com/pincho-app/pincho-sh/-/tree/main/examples\n\n"
+    printf "  https://github.com/Pincho-App/pincho-sh/tree/main/examples\n\n"
 
     printf "${BLUE}Documentation:${NC}\n"
-    printf "  https://gitlab.com/pincho-app/pincho-sh\n\n"
+    printf "  https://github.com/Pincho-App/pincho-sh\n\n"
 
     # Suggest adding to shell profile
     if [ "$INSTALL_DIR" != "$DEFAULT_INSTALL_DIR" ]; then

@@ -7,7 +7,7 @@ Official shell script library for [Pincho](https://pincho.app) - Send push notif
 ## Installation
 
 ```bash
-curl -sL https://gitlab.com/pincho-app/pincho-sh/-/raw/main/install.sh | sh
+curl -sL https://raw.githubusercontent.com/Pincho-App/pincho-sh/main/install.sh | sh
 ```
 
 **Get your token:** Open app → Settings → Help → copy token
@@ -92,7 +92,7 @@ For better array handling: `. /usr/local/lib/pincho/pincho-bash.sh` (requires Ba
 
 ## Encryption
 
-Not supported in shell scripts. Use [CLI tool](https://gitlab.com/pincho-app/pincho-cli) or language SDKs (Go, Python, JS, PHP, C#, Rust) for encryption.
+Not supported in shell scripts. Use [CLI tool](https://github.com/Pincho-App/pincho-cli) or language SDKs (Go, Python, JS, PHP, C#, Rust) for encryption.
 
 ## Examples
 
@@ -107,8 +107,8 @@ See [examples/](examples/) directory for complete scripts: cron jobs, git hooks,
 ## Links
 
 - **Website**: https://pincho.app
-- **Repository**: https://gitlab.com/pincho-app/pincho-sh
-- **CLI Tool**: https://gitlab.com/pincho-app/pincho-cli
+- **Repository**: https://github.com/Pincho-App/pincho-sh
+- **CLI Tool**: https://github.com/Pincho-App/pincho-cli
 
 ## License
 

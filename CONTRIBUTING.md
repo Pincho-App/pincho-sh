@@ -2,7 +2,7 @@
 
 Thank you for your interest in contributing to the Pincho shell scripts! This document outlines the process and requirements for contributing to this project.
 
-## Pull Request / Merge Request Requirements
+## Pull Request Requirements
 
 **REQUIRED**: Documentation must be updated before merging any PR. This ensures documentation stays in sync with code changes.
 
@@ -14,7 +14,7 @@ When making code changes, ALWAYS check if these documentation files need updatin
 
 - [ ] **CHANGELOG.md** - Add entry under `[Unreleased]` section
   - Use categories: Added, Changed, Fixed, Deprecated, Removed, Security
-  - Include issue/MR number reference
+  - Include issue/PR number reference
   - Example: `- Fixed JSON escaping for special characters (#15)`
 
 - [ ] **README.md** - Update if:
@@ -121,9 +121,9 @@ Always add entries to the `[Unreleased]` section at the top:
 
 When a release is made, the `[Unreleased]` section will be converted to a version number.
 
-## PR/MR Description Template
+## PR Description Template
 
-Include in your PR/MR description:
+Include in your PR description:
 
 ```markdown
 ## Changes Made
@@ -148,7 +148,7 @@ Include in your PR/MR description:
 
 ## Issue Template
 
-**IMPORTANT**: Always use the issue template when creating issues via GitLab UI or structure your issue following this format.
+**IMPORTANT**: Structure every issue following this format, whether you create it in the GitHub UI or with the `gh` CLI.
 
 ### Required Sections
 
@@ -160,10 +160,10 @@ Include in your PR/MR description:
 - **Proposed Solution** (Optional) - If you have implementation ideas
 - **Success Criteria** - How to know when it's done
 
-### Creating Issues via glab CLI
+### Creating Issues via gh CLI
 
 ```bash
-glab issue create --title "Issue title" --description "$(cat <<'EOF'
+gh issue create --title "Issue title" --body "$(cat <<'EOF'
 ## Problem / Motivation
 [Describe why this issue exists]
 
@@ -202,12 +202,13 @@ EOF
 )"
 ```
 
-## GitLab Workflow
+## GitHub Workflow
 
 ### Default Settings
 
-- MRs default to "squash commits" and "delete source branch" enabled
-- These settings help keep the main branch clean and linear
+- Pull requests are squash-merged and the source branch is deleted on merge
+- These settings keep the main branch clean and linear
+- `.github/workflows/ci.yml` runs the test suite on pushes and pull requests and sends the release notification on `v*` tags
 
 ### Starting New Work
 
@@ -221,14 +222,15 @@ When starting new work:
 
 ```bash
 # View and manage issues
-glab issue list
-glab issue view <issue-number>
-glab issue close <issue-number>
+gh issue list
+gh issue view <issue-number>
+gh issue close <issue-number>
 
-# Create and manage merge requests
-glab mr create
-glab mr list
-glab mr view <mr-number>
+# Create and manage pull requests
+gh pr create
+gh pr list
+gh pr view <pr-number>
+gh pr merge <pr-number> --squash --delete-branch
 ```
 
 ## Platform-Specific Considerations
@@ -255,7 +257,7 @@ glab mr view <mr-number>
 
 If you have questions about contributing, please:
 - Review the [README.md](README.md) for usage and architecture
-- Check existing issues and merge requests for examples
+- Check existing issues and pull requests for examples
 - Reach out to the maintainers
 
 Thank you for contributing to Pincho Shell Scripts!
